@@ -1,59 +1,59 @@
-#How to build COCORE Linux
+# Xillybus and ROS on Ubuntu on Zybo
 
-###Goal of this tutorial
+###目標
+Digilentの[Zybo](https://reference.digilentinc.com/reference/programmable-logic/zybo/start)上でUbuntu14.04 + Xillybus + ROS indigoが動作するシステムを作る
 
-Bilding a system which runs Xillybus IP and ROS(Robot Operarting System) Indigo on Ubuntu14.04 on [Zybo](https://reference.digilentinc.com/reference/programmable-logic/zybo/start)
+###使用環境
 
-###Environment of build
+本チュートリアルではLinuxマシンとWindowsマシンの両方を使用しています。  
+どちらのマシンにもVivado14.04(SDKも)をインストールしてください。
 
-This tutorial uses both Windows and Linux, so please install Vivado + SDK 14.04 later each machine.
-
-- Linux: Ubuntu16.04 64bit
+- Linuxマシン：Ubuntu16.04 64bit
 	- Vivado 2014.4
-- Windows : Windows10 (For hardware synthesis. Only Linux PC is OK)
+- Windowsマシン：Windows10 (回路の論理合成をするため。LinuxマシンのみでもOK)
 	- Vivado 2014.4
 - Zybo
-- microSD 16GB : 8GB or more is recommended!
+- microSD 16GB：8GB以上推奨
 
 <a name="Contents"></a>
 ###Contents
 
 <!-- MarkdownTOC autolink="true" autoanchor="true" bracket="round" depth="3" -->
 
-- [Build hardware @Windows](#build-hardware-windows)
-- [Build u-boot @Ubuntu](#build-u-boot-ubuntu)
-- [Generation of BOOT.bin @Windows](#generation-of-bootbin-windows)
-- [Build Linux kernel @Ubuntu](#build-linux-kernel-ubuntu)
-- [Build device tree file\(dtb\) @Ubuntu](#build-device-tree-filedtb-ubuntu)
-- [Description of uEnv.txt @Ubuntu](#description-of-uenvtxt-ubuntu)
-- [Get Ubuntu root file system @Ubuntu](#get-ubuntu-root-file-system-ubuntu)
-- [Setting SD for boot @Ubuntu](#setting-sd-for-boot-ubuntu)
-- [Writing data to SD @Ubuntu](#writing-data-to-sd-ubuntu)
-- [Boot test @Windows](#boot-test-windows)
-- [Setting on Zybo @Zybo](#setting-on-zybo-zybo)
-	- [Setting permissions of Xillybus device driver](#setting-permissions-of-xillybus-device-driver)
-	- [Create swap area](#create-swap-area)
-	- [Proxy setting](#proxy-setting)
-	- [Installation of various tools](#installation-of-various-tools)
-- [Run demo application @Zybo](#run-demo-application-zybo)
-- [Installation of ROS indigo @Zybo](#installation-of-ros-indigo-zybo)
+- [ハードウェアのビルド@Windows](#ハードウェアのビルドwindows)
+- [u-bootのビルド@Ubuntu](#u-bootのビルドubuntu)
+- [BOOT.binの生成@Windows](#bootbinの生成windows)
+- [Linuxカーネルのビルド@Ubuntu](#linuxカーネルのビルドubuntu)
+- [デバイスツリーファイル\(dtb\)の作成@Ubuntu](#デバイスツリーファイルdtbの作成ubuntu)
+- [uEnv.txt作成@Ubuntu](#uenvtxt作成ubuntu)
+- [Ubuntuのファイルシステムの取得@Ubuntu](#ubuntuのファイルシステムの取得ubuntu)
+- [ブート用SDの作成@Ubuntu](#ブート用sdの作成ubuntu)
+- [SDカードに書き込み@Ubuntu](#sdカードに書き込みubuntu)
+- [起動テスト@Windows](#起動テストwindows)
+- [Zybo上における設定@Zybo](#zybo上における設定zybo)
+	- [xillybusのデバイスドライバのパーミッションの設定](#xillybusのデバイスドライバのパーミッションの設定)
+	- [Swap領域を作る](#swap領域を作る)
+	- [Proxyを設定する](#proxyを設定する)
+	- [各種ツール導入](#各種ツール導入)
+- [デモappを動かす@Zybo](#デモappを動かすzybo)
+- [ROS indigoのインストール@Zybo](#ros-indigoのインストールzybo)
 - [Complete!](#complete)
-- [Reference](#reference)
-- [Various Documents](#various-documents)
+- [参考サイト](#参考サイト)
+- [各種ドキュメント](#各種ドキュメント)
 
 <!-- /MarkdownTOC -->
 
-<a name="build-hardware-windows"></a>
-##Build hardware @Windows
+<a name="ハードウェアのビルドwindows"></a>
+##ハードウェアのビルド@Windows
 
-Firstly, create a work space under drive C (`C:\work_space`).
+Windowsマシン上において、最初にCドライブ直下にワークスペース`C:\work_space`を作ります。  
+以下、Windowsマシンにおける作業はこのワークスペースにおいて行います。  
 
-Please download a base design of Xillybus for Zybo from [direct link](http://xillybus.com/downloads/xillinux-eval-zybo-1.3c.zip) and save your work space.
-[Xillybus](http://xillybus.com/)
+[Xillybusのサイト](http://xillybus.com/)からzyboのベースデザイン[xillinux-eval-zybo-1.3c.zip](http://xillybus.com/downloads/xillinux-eval-zybo-1.3c.zip)(直リンク)をダウンロードしワークスペースに保存します。  
 
 `C:\work_space\xillinux-eval-zybo-1.3c.zip`
 
-When archive file is unpacked, it will have the following directory structure.
+展開すると以下のようなディレクトリ構造になっています。
 
 ```
 xillinux-eval-zybo-1.3c/
@@ -66,134 +66,140 @@ xillinux-eval-zybo-1.3c/
 |--vivado-essentials/
 ```
 
-Start up Vivado 14.04. When starting Vivado, select `Tools -> Run Tcl Script` and specify `C:\work_space\xillinux-eval-zybo-1.3c\verilog\xillydemo-vivado.tcl`.
+Vivado14.04を起動します。Vivadoを起動したら`Tools->Run Tcl Script`を選択し、  
+`C:\work_space\xillinux-eval-zybo-1.3c\verilog\xillydemo-vivado.tcl`を指定します。
 
 <img src="img/vivado_runtcl.png" height="50%">
 
-The Vivado project of Xillybus will start and execute **Generate Bitstream**.
+XillybusのVivadoプロジェクトが起動します。  
+プロジェクトが起動したら**Generate Bitstream**します。
 
 <img src="img/xillybus_vivado.png" width=70%>
 
-When **Generate Bitstream** completed, following dialog will open. Then select Cancel.
+完了したら以下のようなダイアログが出ますが、Cancelしてください。
 
 <img src="img/done_synth.png">
 
-[Return Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="build-u-boot-ubuntu"></a>
-##Build u-boot @Ubuntu
-
-On ubuntu, create a work directory `~/work_dir`
+<a name="u-bootのビルドubuntu"></a>
+##u-bootのビルド@Ubuntu
+Ubuntuマシン上において、最初にワークスペースを作ります。  
+以下、Ubuntuマシンにおける作業はこのワークスペースにおいて行います。  
 
 ```
 $ mkdir ~/work_dir
 $ cd ~/work_dir
 ```
 
-Next, setting Vivado14.04
+また、Vivado14.04のセッティングをします。
 
 ```
 $ source /opt/Xilinx/Vivado/2014.4/settings64.sh
 ```
 
-Get source code for u-boot from github repository.
+u-bootのためのソースコードを取得します。
 
 ```
 $ git clone -b master-next https://github.com/DigilentInc/u-boot-Digilent-Dev.git
 $ cd u-boot-Digilent-Dev/
 ```
 
-Configure for Zybo.
+Zybo用のコンフィギュレーションをします。
 
 ```
 $ make CROSS_COMPILE=arm-xilinx-linux-gnueabi- zynq_zybo_config
 ```
 
-Build.
+ビルドします。
 
 ```
 $ make CROSS_COMPILE=arm-xilinx-linux-gnueabi-
 ```
 
-
-If **u-boot** was generated under `~/u-boot-Digilent-Dev/`, building is successful.  
-Copy the **u-boot** under `C:\work_space` at windows PC and named **u-boot.elf**.
+`~/u-boot-Digilent-Dev/`に**u-boot**が出来ていたら成功です。  
+この**u-boot**をWindowsマシンの`C:\work_space`に**u-boot.elf**という名前でコピーします。
 
 <img src="img/carry_uboot.png" width="70%" >
 
-[Return Contents](#Contents)
+[Contentsにもどる](#Contents)
 
 
-<a name="generation-of-bootbin-windows"></a>
-##Generation of BOOT.bin @Windows
+<a name="bootbinの生成windows"></a>
+##BOOT.binの生成@Windows
 
-Export hardware of the built project on Vivado, so select `File->Export->Export Hardware`.
+先ほどビルドしたVivado上のハードウェアをエクスポートします。  
+`File->Export->Export Hardware`を選択してください。
 
 <img src="img/export_hw.png" width="70%">
 
-Following dialog will open, check **Include bitstream** and OK.
+以下のダイアログが出ます。**Include bitstream**にチェックをつけてOKしてください。
 
 <img src="img/export_heok.png" width="40%">
 
-Boot SDK and Select `File->Launch SDK`.
+SDKを起動します。`File->Launch SDK`を選択してください。
 
 <img src="img/launch_sdk.png" width="60%"">
 
-Following dialog will open and select OK.
+以下のダイアログが出ます。OKしてください。
 
 <img src="img/launch_sdkok.png">
 
-The project of Xillybus will be generated on SDK.
+SDKにおいてXillybusのプロジェクトが作成されました。
 
 <img src="img/sdk_boot.png" width="70%">
 
-Select `File->New->Application Project`
+SDK上において`File->New->Application Project`を選択します
+。
 
 <img src="img/sdk_make_app.png" width="70%">
 
-In following dialog, please input **FSBL** as a Project Name and select Next.
+以下のダイアログでProject Nameに**FSBL**と入力しNextしてください。
 
 <img src="img/input_fsbl.png" height="400">
 
-In Template, please select **Zynq FSBL** and Finish
+また、Templateでは**Zynq FSBL**を選択しFinishします。
 
 <img src="img/select_fsbl.png" height="400">
 
-The project of FSBL is generated and built automatically, **FSBL.elf** is generated under `C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\FSBL\Debug`.
+自動的にFSBLのプロジェクトが生成・ビルドされ  
+`C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\FSBL\Debug`に**FSBL.elf**ができます。
 
 <img src="img/gen_fsbl.png" width="70%">
 
-In SDK, right-click on folder named FSBL, select **Create Boot Image** from the menu.
+SDK上においてFSBLフォルダで右クリックし、メニューから**Create Boot Image**を選択してください。
 
 <img src="img/cre_bootimg.png" width="70%">
 
-Select **Add** and specify `C:\work_space\u-boot.elf`, and please OK on following dialog.
+ダイアログにおいて**Add**し`C:\work_space\u-boot.elf`を選択し、OKします。
 
 <img src="img/add_browse.png" width="50%"">
 <img src="img/select_bootelf.png" width="50%"">
 
-The files are as follows.
+最終的なファイルは以下の3つです。
 
 - (bootloader) FSBL.elf
 - xillydemo.bit
 - u-boot.elf
 
-If **xillydemo.bit** is not selected, specify `C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\xillydemo_hw_platform_0\xillydemo.bit` and **Add**
+**xillydemo.bit**が選択されていない場合は  
+`C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\xillydemo_hw_platform_0\xillydemo.bit`  
+を**Add**してください。  
 
-When you could confirm the files, please **Create Image**.
+ファイルの確認ができたら**Create Image**してください。
 
 <img src="img/cre_bootbin.png" height="400">
 
-If **BOOT.bin** is generated under `C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\FSBL\bootimage`, building is successful.  
-Copy BOOT.bin
-Copy BOOT.bin to `~/work_dir` on Ubuntu PC.
+`C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\FSBL\bootimage`  
+に**BOOT.bin**が生成されていれば成功です。  
+BOOT.binはUbuntuマシンの`~/work_dir`へコピーしておきましょう。
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="build-linux-kernel-ubuntu"></a>
-##Build Linux kernel @Ubuntu
+<a name="linuxカーネルのビルドubuntu"></a>
+##Linuxカーネルのビルド@Ubuntu
 
-Get source code for Linux kernel from github repository
+Linuxカーネルのソースコードを取得します。
 
 ```
 $ cd ~/work_dir
@@ -201,44 +207,44 @@ $ git clone -b master-next https://github.com/DigilentInc/Linux-Digilent-Dev.git
 $ cd Linux-Digilent-Dev/
 ```
 
-Configure for Zybo.
+Zybo用のデフォルトコンフィギュレーションをします。
 
 ```
 $ make ARCH=arm CROSS_COMPILE=arm-xilinx-linux-gnueabi- xilinx_zynq_defconfig
 ```
 
-Then, edit `~/work_dir/Linux-Digilent-Dev/.config` to embed device driver of Xillybus in linux kernel.
+ここで、LinuxカーネルにXillybusのデバイスドライバを導入するために`~/work_dir/Linux-Digilent-Dev/.config`を編集します。
 
 ```diff
 # .config
-# Around line 1503, find "XILLYBUS"
+# 1503行目あたり。"xilly"で検索してもいい。
 - # CONFIG_XILLYBUS is not set
 + CONFIG_XILLYBUS=y
 ```
 
-Please build. Build takes some moments.
+ビルドします。ビルドにはある程度時間がかかります。
 
 ```
 $ make ARCH=arm CROSS_COMPILE=arm-xilinx-linux-gnueabi-
 ```
 
-If build is started, you will be asked for some questions. Then please select **y (yes)**.
+ビルドを開始すると、いくつか質問されます。**y**と入力してください。
 
 ```
 Xillybus over PCIe (XILLYBUS_PCIE) [N/m/y/?] (NEW) y
 Xillybus over Device Tree (XILLYBUS_OF) [N/m/y/?] (NEW) y
 ```
 
-If build is successful, **zImage** will be generated under `~/work_dir/Linux-Digilent-Dev/arch/arm/boot/`.
+ビルドに成功すると`~/work_dir/Linux-Digilent-Dev/arch/arm/boot/`に**zImage**が生成されます。
 
-Build uImage.
+uImageを作成します。
 
 ```
 $ make ARCH=arm CROSS_COMPILE=arm-xilinx-linux-gnueabi- UIMAGE_LOADADDR=0x8000 uImage
 ```
 
-If build is successful, **uImage** will be generated under `~/work_dir/Linux-Digilent-Dev/arch/arm/boot/`.  
-Copy uImage to `~/work_dir/`.
+ビルドに成功すると`~/work_dir/Linux-Digilent-Dev/arch/arm/boot/`に**uImage**が生成されます。  
+uImageを`~/work_dir/`にコピーしておきます。
 
 ```
 $ cd ~/work_dir/
@@ -248,15 +254,15 @@ BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage
 ```
 
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="build-device-tree-filedtb-ubuntu"></a>
-##Build device tree file(dtb) @Ubuntu
+<a name="デバイスツリーファイルdtbの作成ubuntu"></a>
+##デバイスツリーファイル(dtb)の作成@Ubuntu
 
-The file which uses for make device tree file (dtb) is `/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zybo.dts`  
-Then edit **zynq-zybo.dts**.
+dtbの作成に使用するdtsファイルは`/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zybo.dts`です。  
+この際、**zynq-zybo.dts**を編集します。
 
-Copy **zynq-zybo.dts** to `~/work_dir`.
+`~/work_dir`にファイルをコピーしましょう。
 
 ```
 $ cd ~/work_dir
@@ -265,10 +271,10 @@ $ ls
 BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage  zynq-zybo.dts
 ```
 
-Edit contents of **zynq-zybo.dts** are as follows.
+**zynq-zybo.dts**の編集内容は以下の通りです。
 
 ```diff
-/*Around line 41*/
+/*41行目あたり*/
 	chosen {
 -		bootargs = "console=ttyPS0,115200 root=/dev/ram rw earlyprintk";
 +		bootargs = "console=ttyPS0,115200 root=/dev/mmcblk0p2 rw earlyprintk rootfstype=ext4 rootwait devtmpfs.mount=1";
@@ -295,7 +301,7 @@ Edit contents of **zynq-zybo.dts** are as follows.
 :
 :
 :
-/*Around line 329*/
+/*329行目あたり*/
 		ps7_xadc: ps7-xadc@f8007100 {
 			clocks = <&clkc 12>;
 			compatible = "xlnx,zynq-xadc-1.00.a";
@@ -324,21 +330,21 @@ Edit contents of **zynq-zybo.dts** are as follows.
 } ;
 ```
 
-When edit is completed, build device tree file.
+編集が完了したら、ビルドします。
 
 ```
 $ cd ~/work_dir/Linux-Digilent-Dev
 $ ./scripts/dtc/dtc -I dts -O dtb -o ../devicetree.dtb ../zynq-zybo.dts
 ```
 
-If build is successful, devicetree.dtb will be generated under `~/work_dir`.
+ビルドに成功すると`~/work_dir`に**devicetree.dtb**ができています。
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="description-of-uenvtxt-ubuntu"></a>
-##Description of uEnv.txt @Ubuntu
+<a name="uenvtxt作成ubuntu"></a>
+##uEnv.txt作成@Ubuntu
 
-Describe uEnv.txt.
+uEnv.txtを作成します。
 
 ```
 $ cd ~/work_dir
@@ -347,26 +353,27 @@ uenvcmd=fatload mmc 0 0x03000000 uImage && fatload mmc 0 0x02A00000 devicetree.d
 EOT
 ```
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="get-ubuntu-root-file-system-ubuntu"></a>
-##Get Ubuntu root file system @Ubuntu
+<a name="ubuntuのファイルシステムの取得ubuntu"></a>
+##Ubuntuのファイルシステムの取得@Ubuntu
 
-You can download root file system of Ubuntu14.04 from following URL.  
-In this tutorial, the file system is obtained by wget command, so download is not required on web site.
+以下URLからUbuntu14.04 armhfのルートファイルシステムをダウンロードできます。  
+なお、今回はwgetで取得しますのでwebサイトにおけるダウンロードはいりません。  
 
 **[http://www.armhf.com/download/](http://www.armhf.com/download/)**
 
 <img src="img/ubuntu_rfs.png" width="60%">
 
-Download a root file system of Ubuntu14.04 to `~/work_dir`.
+ワークスペースにファイルシステムをダウンロードします。
 
 ```
 $ cd ~/work_dir
 $ wget http://s3.armhf.com/dist/basefs/ubuntu-trusty-14.04-armhf.com-20140603.tar.xz
 ```
 
-Make a directory and unpack the file system at this directory.
+ダウンロードしたファイルシステム用のディレクトリを作成し、展開します。  
+以下のコマンドで展開に失敗する場合はGUIからも展開できます。
 
 ```
 $ mkdir ubuntu_rootfs
@@ -374,28 +381,30 @@ $ cd ubuntu_rootfs
 $ tar -Jxvf ../ubuntu-trusty-14.04-armhf.com-20140603.tar.xz
 ```
 
-When the unpacking is successful, the following directories are generated. 
+展開に成功すると以下のようなディレクトリができます。
 
 ```
-bin  boot  dev  etc  home  lib  media  mnt  opt
-proc  root  run  sbin  srv  sys  tmp  usr  var
+bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
 ```
 
-[Return to Contents](#Contents)
 
-<a name="setting-sd-for-boot-ubuntu"></a>
-##Setting SD for boot @Ubuntu
+[Contentsにもどる](#Contents)
 
-Make partitions on a SD card (microSD) for boot Ubuntu on Zybo.  
-The SD card which has 8GB and more is recommended.  
+<a name="ブート用sdの作成ubuntu"></a>
+##ブート用SDの作成@Ubuntu
 
-Please confirm mount information by lsblk command after insert of SD card to Ubuntu PC.  
+Zybo上でUbuntuを起動するために、SDカード(microSD)にパーティションを作成します。  
+使用するSDカードは**8GB**以上をおすすめします。  
+  
+
+UbuntuマシンにSDカードを挿入したあと、lsblkでマウント状況を確認しましょう。  
+以下の場合では/dev/sdcとしてマウントされています。
 
 ```
 $ lsblk 
 NAME                 MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
 sda                    8:0    0 465.8G  0 disk 
-├─sda1                 8:1    0   100M  0 part /media/kazushi/
+├─sda1                 8:1    0   100M  0 part /media/kazushi/システムで予約済み
 ├─sda2                 8:2    0   117G  0 part /media/kazushi/F08875B788757D42
 ├─sda3                 8:3    0  31.3G  0 part /media/kazushi/DATA
 ├─sda5                 8:5    0   500M  0 part /media/kazushi/17c35461-41ed-4453-a0c7-b02c06fd6cae
@@ -411,11 +420,10 @@ sr0                   11:0    1  1024M  0 rom
 loop0                  7:0    0   1.7G  0 loop /mnt
 ```
 
-Make partitions by fdisk command. Please delete old partitions on your SD card.  
+fdiskコマンドでパーティションを作成します。SDカードのパーティションが何もないところから始めてください。  
+まず、第1パーティションを作成します。このパーティションはブートローダやLinuxカーネルが入ります。
 
-Make first partition. This partition includes boot loader, Linux kernel and so on.
-
-- p : primary, First sector : default, Last sector : +64Mbyte
+- p：プライマリ、First sector：デフォルト、Last sector：+64Mbyte
 
 ```
 $ sudo fdisk /dev/sdc 
@@ -424,7 +432,8 @@ Welcome to fdisk (util-linux 2.27.1).
 Changes will remain in memory only, until you decide to write them.
 Be careful before using the write command.
 
-Command (m for help): p
+
+コマンド (m でヘルプ): p
 Disk /dev/sdc: 14.9 GiB, 15931539456 bytes, 31116288 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -432,18 +441,18 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: 0xcc4a40d8
 
-Command (m for help): n
+コマンド (m でヘルプ): n
 Partition type
    p   primary (0 primary, 0 extended, 4 free)
    e   extended (container for logical partitions)
 Select (default p): p
-Partition number (1-4, default 1): 1
+パーティション番号 (1-4, default 1): 1
 First sector (2048-31116287, default 2048): 
 Last sector, +sectors or +size{K,M,G,T,P} (2048-31116287, default 31116287): +64M
 
 Created a new partition 1 of type 'Linux' and of size 64 MiB.
 
-Command (m for help): p
+コマンド (m でヘルプ): p
 Disk /dev/sdc: 14.9 GiB, 15931539456 bytes, 31116288 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -451,27 +460,27 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: 0xcc4a40d8
 
-Device Boot      Start  End      Blocks   Id  System
+デバイス   起動 Start 最後から セクタ Size Id タイプ
 /dev/sdc1        2048   133119 131072  64M 83 Linux
 ```
 
-Next, make second partition.
+続けて第2パーティションを作成します。
 
-- p : primary, First sector : default, Last sector : default
+- p：プライマリ、First sector：デフォルト、Last sector：デフォルト
 
 ```
-Command (m for help): n
+コマンド (m でヘルプ): n
 Partition type
    p   primary (0 primary, 0 extended, 4 free)
    e   extended (container for logical partitions)
 Select (default p): p
-Partition number (1-4, default 1): 1
+パーティション番号 (1-4, default 1): 1
 First sector (2048-31116287, default 2048): 
 Last sector, +sectors or +size{K,M,G,T,P} (2048-31116287, default 31116287): +64M
 
 Created a new partition 1 of type 'Linux' and of size 64 MiB.
 
-Command (m for help): p
+コマンド (m でヘルプ): p
 Disk /dev/sdc: 14.9 GiB, 15931539456 bytes, 31116288 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -479,20 +488,21 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: 0xcc4a40d8
 
+デバイス   起動 Start 最後から セクタ Size Id タイプ
 /dev/sdc1        2048   133119 131072  64M 83 Linux
 
-Command (m for help): n
+コマンド (m でヘルプ): n
 Partition type
    p   primary (1 primary, 0 extended, 3 free)
    e   extended (container for logical partitions)
 Select (default p): p
-Partition number (2-4, default 2): 2
+パーティション番号 (2-4, default 2): 2
 First sector (133120-31116287, default 133120): 
 Last sector, +sectors or +size{K,M,G,T,P} (133120-31116287, default 31116287): 
 
 Created a new partition 2 of type 'Linux' and of size 14.8 GiB.
 
-Command (m for help): p
+コマンド (m でヘルプ): p
 Disk /dev/sdc: 14.9 GiB, 15931539456 bytes, 31116288 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -500,49 +510,49 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: 0xcc4a40d8
 
-Device Boot      Start    End      Blocks   Id  System
+デバイス   起動  Start 最後から セクタ  Size Id タイプ
 /dev/sdc1         2048   133119   131072   64M 83 Linux
 /dev/sdc2       133120 31116287 30983168 14.8G 83 Linux
 
 ```
 
-Change system type of first partition to FAT32(Command : b).
+第1パーティションのシステムタイプをFAT32(コマンド：b)に変更します。
 
 ```
-Command (m for help): t
-Partition number (1,2, default 2): 1
+コマンド (m でヘルプ): t
+パーティション番号 (1,2, default 2): 1
 Partition type (type L to list all types): L
 
- 0  Empty           24  NEC DOS         81  Minix / old Lin bf  Solaris
- 1  FAT12           27  Hidden NTFS Win 82  Linux swap / So c1  DRDOS/sec (FAT-
+ 0  空              24  NEC DOS         81  Minix / 古い Li bf  Solaris        
+ 1  FAT12           27  Hidden NTFS Win 82  Linux スワップ  c1  DRDOS/sec (FAT-
  2  XENIX root      39  Plan 9          83  Linux           c4  DRDOS/sec (FAT-
- 3  XENIX usr       3c  PartitionMagic  84  OS/2 hidden C:  c6  DRDOS/sec (FAT-
- 4  FAT16 <32M      40  Venix 80286     85  Linux extended  c7  Syrinx
- 5  Extended        41  PPC PReP Boot   86  NTFS volume set da  Non-FS data
- 6  FAT16           42  SFS             87  NTFS volume set db  CP/M / CTOS / .
- 7  HPFS/NTFS/exFAT 4d  QNX4.x          88  Linux plaintext de  Dell Utility
- 8  AIX             4e  QNX4.x 2nd part 8e  Linux LVM       df  BootIt
- 9  AIX bootable    4f  QNX4.x 3rd part 93  Amoeba          e1  DOS access
- a  OS/2 Boot Manag 50  OnTrack DM      94  Amoeba BBT      e3  DOS R/O
- b  W95 FAT32       51  OnTrack DM6 Aux 9f  BSD/OS          e4  SpeedStor
- c  W95 FAT32 (LBA) 52  CP/M            a0  IBM Thinkpad hi eb  BeOS fs
- e  W95 FAT16 (LBA) 53  OnTrack DM6 Aux a5  FreeBSD         ee  GPT
- f  W95 Ext'd (LBA) 54  OnTrackDM6      a6  OpenBSD         ef  EFI (FAT-12/16/
-10  OPUS            55  EZ-Drive        a7  NeXTSTEP        f0  Linux/PA-RISC b
-11  Hidden FAT12    56  Golden Bow      a8  Darwin UFS      f1  SpeedStor
-12  Compaq diagnost 5c  Priam Edisk     a9  NetBSD          f4  SpeedStor
-14  Hidden FAT16 <3 61  SpeedStor       ab  Darwin boot     f2  DOS secondary
-16  Hidden FAT16    63  GNU HURD or Sys af  HFS / HFS+      fb  VMware VMFS
-17  Hidden HPFS/NTF 64  Novell Netware  b7  BSDI fs         fc  VMware VMKCORE
-18  AST SmartSleep  65  Novell Netware  b8  BSDI swap       fd  Linux raid auto
-1b  Hidden W95 FAT3 70  DiskSecure Mult bb  Boot Wizard hid fe  LANstep
-1c  Hidden W95 FAT3 75  PC/IX           be  Solaris boot    ff  BBT
-1e  Hidden W95 FAT1 80  Old Minix
+ 3  XENIX usr       3c  PartitionMagic  84  OS/2 hidden or  c6  DRDOS/sec (FAT-
+ 4  FAT16 <32M      40  Venix 80286     85  Linux 拡張領域  c7  Syrinx         
+ 5  拡張領域        41  PPC PReP Boot   86  NTFS ボリューム da  非 FS データ   
+ 6  FAT16           42  SFS             87  NTFS ボリューム db  CP/M / CTOS / .
+ 7  HPFS/NTFS/exFAT 4d  QNX4.x          88  Linux プレーン  de  Dell ユーティリ
+ 8  AIX             4e  QNX4.x 第2パー  8e  Linux LVM       df  BootIt         
+ 9  AIX 起動可能    4f  QNX4.x 第3パー  93  Amoeba          e1  DOS access     
+ a  OS/2 ブートマネ 50  OnTrack DM      94  Amoeba BBT      e3  DOS R/O        
+ b  W95 FAT32       51  OnTrack DM6 Aux 9f  BSD/OS          e4  SpeedStor      
+ c  W95 FAT32 (LBA) 52  CP/M            a0  IBM Thinkpad ハ ea  Rufus alignment
+ e  W95 FAT16 (LBA) 53  OnTrack DM6 Aux a5  FreeBSD         eb  BeOS fs        
+ f  W95 拡張領域 (L 54  OnTrackDM6      a6  OpenBSD         ee  GPT            
+10  OPUS            55  EZ-Drive        a7  NeXTSTEP        ef  EFI (FAT-12/16/
+11  隠し FAT12      56  Golden Bow      a8  Darwin UFS      f0  Linux/PA-RISC  
+12  Compaq 診断     5c  Priam Edisk     a9  NetBSD          f1  SpeedStor      
+14  隠し FAT16 <32M 61  SpeedStor       ab  Darwin ブート   f4  SpeedStor      
+16  隠し FAT16      63  GNU HURD または af  HFS / HFS+      f2  DOS セカンダリ 
+17  隠し HPFS/NTFS  64  Novell Netware  b7  BSDI fs         fb  VMware VMFS    
+18  AST SmartSleep  65  Novell Netware  b8  BSDI スワップ   fc  VMware VMKCORE 
+1b  隠し W95 FAT32  70  DiskSecure Mult bb  隠し Boot Wizar fd  Linux raid 自動
+1c  隠し W95 FAT32  75  PC/IX           bc  Acronis FAT32 L fe  LANstep        
+1e  隠し W95 FAT16  80  古い Minix      be  Solaris ブート  ff  BBT            
 Partition type (type L to list all types): b
 
 Changed type of partition 'Linux' to 'W95 FAT32'.
 
-Command (m for help): p
+コマンド (m でヘルプ): p
 Disk /dev/sdc: 14.9 GiB, 15931539456 bytes, 31116288 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -550,24 +560,24 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disklabel type: dos
 Disk identifier: 0xcc4a40d8
 
-Device Boot      Start   End      Blocks   Id  System
+デバイス   起動  Start 最後から セクタ  Size Id タイプ
 /dev/sdc1        2048   133119   131072   64M  b W95 FAT32
 /dev/sdc2       133120 31116287 30983168 14.8G 83 Linux
 
 ```
 
-Finally, the SD card setting finishes by writing configuration with command **w**.
+最後に**w**コマンドで変更を書き込んで終了です。
 
-Configure partition name.
+パーティション名を設定します。
 
-**First partition**
+**第1パーティション**
 
 ```
 $ sudo mkfs.msdos -n ZYBO_BOOT /dev/sdc1
 mkfs.fat 3.0.28 (2015-05-16)
 ```
 
-**Second partition**
+**第2パーティション**
 
 ```
 $ sudo mkfs.ext4 -L ROOT_FS /dev/sdc2
@@ -583,13 +593,13 @@ Creating journal (32768 blocks): done
 Writing superblocks and filesystem accounting information: done
 ```
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="writing-data-to-sd-ubuntu"></a>
-##Writing data to SD @Ubuntu
+<a name="sdカードに書き込みubuntu"></a>
+##SDカードに書き込み@Ubuntu
 
-Copy some files to SD card.  
-The files is following list.
+SDカードにシステムに必要なファイルをコピーします。  
+コピーするファイルは以下のものです。（SDカードをマウントしてください。）
 
 - ZYBO_ROOT
 	- BOOT.bin
@@ -597,7 +607,7 @@ The files is following list.
 	- uEnv.txt
 	- uImage
 - ROOT_FS
-	- Ubuntu root file system
+	- Ubuntuのファイルシステム
 
 **ZYBO_ROOT**
 
@@ -618,14 +628,14 @@ $ cd ~/work_dir/ubuntu_rootfs
 $ sudo cp -rf * /media/user_name/ROOT_FS/.
 ```
 
-When writing finished, create configuration file which is for serial connection.
+書き込みが完了したら、Zyboにシリアル接続時、ログインできるようにするため、設定ファイルを作成します。
 
 ```
 $ cd /media/user_name/ROOT_FS/etc/init
 $ sudo touch ttyPS0.conf
 ```
 
-The file contents is follows.
+ファイルの中身は以下のようにしてください。
 
 ```
 # ttyPS0 - getty
@@ -644,17 +654,17 @@ respawn
 exec /sbin/getty -8 -a root 115200 ttyPS0
 ```
 
-The SD card writing finished.
+これでSDへの書き込みは完了です。
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="boot-test-windows"></a>
-##Boot test @Windows
+<a name="起動テストwindows"></a>
+##起動テスト@Windows
 
-Please connect Zybo to PC with USB cable.  
-Serial console can be used with [Tera Term](https://ttssh2.osdn.jp/), screen command, Terminal(OSX) and so on.  
+Zyboと母艦PCをUSBケーブルで接続してください。  
+Windowsマシンにおいては、デバイスドライバがインストールされているならば、[Tera Term](https://ttssh2.osdn.jp/)などでシリアル接続が可能です。  
 
-The following is a boot log.
+以下はブートログです。
 
 ```
 Device: zynq_sdhci
@@ -931,12 +941,12 @@ root@ubuntu-armhf:~# uname -r
 3.18.0-xilinx-46110-gd627f5d
 ```
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="setting-on-zybo-zybo"></a>
-##Setting on Zybo @Zybo
+<a name="zybo上における設定zybo"></a>
+##Zybo上における設定@Zybo
 
-Change each directory or file permissions.
+各種パーミッションを変更します。
 
 ```
 # chmod 4755 /usr/bin/sudo
@@ -944,25 +954,25 @@ Change each directory or file permissions.
 # chmod o+rwt /tmp
 ```
 
-In this tutorial, please work in root mode below.  
-However, the ubuntu file system which used has a user named **ubuntu (the password is "ubuntu")**.
-So, add **ubuntu** to sudo group.
+以下は基本的にrootモードで作業しています。  
+なお、導入したファイルシステムにはあらかじめ、**ubuntu**というユーザも用意されています(パスワードはubuntu)。  
+そのため、のちの作業の便宜上、ユーザ**ubuntu**をsudoのグループに追加します。
 
 ```
 # gpasswd -a ubuntu sudo
 ```
 
-In addition, fix owner and group of `/home/ubuntu`.
+また、`/home/ubuntu`の所有者とグループを変更します。
 
 ```
 # cd /home
 # chown ubuntu:ubuntu ubuntu/
 ```
 
-<a name="setting-permissions-of-xillybus-device-driver"></a>
-###Setting permissions of Xillybus device driver
+<a name="xillybusのデバイスドライバのパーミッションの設定"></a>
+###xillybusのデバイスドライバのパーミッションの設定
 
-Create a configuration file to fix permissions of the Xillybus device driver.
+xillybusのデバイスドライバのパーミッションを固定するために設定ファイルを作成します。
 
 ```
 # cat <<EOT>> /etc/udev/rules.d/10-xillybus.rules
@@ -970,40 +980,38 @@ SUBSYSTEM=="xillybus", MODE="666", OPTIONS="last_rule"
 EOT
 ```
 
-<a name="create-swap-area"></a>
-###Create swap area
+<a name="swap領域を作る"></a>
+###Swap領域を作る
 
+Zyboにおいて作業をする際にSwap領域を作成したほうが作業がスピーディーになる場合があります。
 
-Working in Zybo may be faster if you create a Swap area.
-
-Create a directory at `/var/cache` for the swap area.
+`/var/cache`にSawp領域用のディレクトリを作ります。
 
 ```
 # mkdir /var/cache/swap
 ```
 
-Create a swapfile of 512MB with following command.
+以下のコマンドで512MBのswapfileを生成します。
 
 ```
 # dd if=/dev/zero of=/var/cache/swap/swapfile bs=1M count=512
 # mkswap /var/cache/swap/swapfile
 ```
 
-
-Edit `/etc/fstab` in the built-in editor.  
-Add the line `/var/cache/swap/swapfile none swap sw 0 0` in the file.
+内蔵エディタで`/etc/fstab`を編集します。  
+ファイル内に`/var/cache/swap/swapfile none swap sw 0 0`の行を追加してください。
 
 ```
 # nano /etc/fstab
 ```
 
-Please reboot.
+リブートしましょう。
 
 ```
 # reboot
 ```
 
-You can check the setting with a command swapon.
+swaponで確認すると、先ほどの設定が確認できます。
 
 ```
 # swapon -s
@@ -1011,10 +1019,10 @@ Filename                                Type            Size    Used    Priority
 /var/cache/swap/swapfile                file            524284  0       -1
 ```
 
-<a name="proxy-setting"></a>
-###Proxy setting
+<a name="proxyを設定する"></a>
+###Proxyを設定する
 
-If you need to set proxy server, please make the following settings.
+Proxyの設定が必要な場合は以下の設定をしてください。
 
 **apt-get**
 
@@ -1027,11 +1035,11 @@ Acquire::socks::proxy "socks://proxy.servr.jp:port/";
 EOT
 ```
 
-**System proxy**
+**システムプロキシ**
 
 ```
 # nano ~/.bashrc
-### Add to the end ###
+### 末尾に追加 ###
 export HTTPS_PROXY=http://proxy.server.jp:port/
 export HTTP_PROXY=http://proxy.server.jp:port/
 export FTP_PROXY=http://proxy.server.jp:port/
@@ -1042,10 +1050,10 @@ export ftp_proxy=http://proxy.server.jp:port/
 
 ```
 
-<a name="installation-of-various-tools"></a>
-###Installation of various tools
+<a name="各種ツール導入"></a>
+###各種ツール導入
 
-Please execute `apt-get update`.
+apt-get updateしましょう。
 
 ```
 # apt-get update
@@ -1057,55 +1065,57 @@ Please execute `apt-get update`.
 # apt-get install ssh -y
 ```
 
-Configure ssh option for root login. Edit `/etc/ssh/sshd_config` as follows.
+ssh接続においてrootログインできるように設定します。  
+`/etc/ssh/sshd_config`に以下の設定をします。
 
 ```diff
 - PermitRootLogin without-password
 + PermitRootLogin yes
 ```
 
-Set root password.
+また、rootパスワードを設定しておきましょう。
 
 ```
 # passwd
 ```
 
-**Others**
+**その他**
 
 ```
-# apt-get install gcc make git -y
+# apt-get install gcc g++ make git -y
 ```
 
-[Return to Contents](#Contents)
 
-<a name="run-demo-application-zybo"></a>
-##Run demo application @Zybo
+[Contentsにもどる](#Contents)
 
-Switch user to **ubuntu**.
+<a name="デモappを動かすzybo"></a>
+##デモappを動かす@Zybo
+
+ubuntuユーザになります。
 
 ```
 # su ubuntu
 $ cd
 ```
 
-Create a directory for demo applications.
+デモアプリ用のディレクトリを作成します。
 
 ```
 $ mkdir demoapps
 $ cd demoapps
 ```
 
-In Xillybus, when sending and receiving data between the processing system and the FPGA, you can send and receive data by reading / writing to the device file.
+XillybusではプロセッシングシステムとFPGA間においてデータを送受信する際は、デバイスファルへread/writeすることでデータを送受信できます。  
+また、read用、write用のそれぞれのデバイスファイルがあり、データを読み書きするとFPGAの回路上のFIFOがデータをバッファしてくれます。
+ここではPythonでread用とwrite用のそれぞれのプログラムを作成・実行します。
 
-In this tutorial, create two applications for data access and execute on Python.
-
-Create **read.py**, **write.py** with `touch` command
+touchコマンドでread.py、write.pyを作成します。
 
 ```
 touch read.py write.py
 ```
 
-The source codes are follows.
+ソースコードは以下のものです。
 
 **read.py**
 
@@ -1148,18 +1158,17 @@ if __name__ == '__main__':
 	main()
 ```
 
-When you execute the programs, please use two terminals.  
-Then, input any string on write side, and push Enter key.   
-If the string is output on read side, the execution is successful.
+プログラムの実行には2つの端末を用いてください。(sshなどでリモートログイン)  
+write側で任意の文字列を入力し、Enterキーを押して、read側に出力されれば成功です。
 
-**Terminal 1**
+**端末1**
 
 ```
 $ python write.py
 123456789
 ```
 
-**Terminal 2**
+**端末2**
 
 ```
 $ python read.py
@@ -1167,45 +1176,45 @@ $ python read.py
 ```
 
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
-<a name="installation-of-ros-indigo-zybo"></a>
-## Installation of ROS indigo @Zybo
+<a name="ros-indigoのインストールzybo"></a>
+##ROS indigoのインストール@Zybo
 
-Install ROS indigo.  
+ROSの導入をします。  
 
-Set repository.
+リポジトリの設定をします。
 
 ```
 $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu trusty main" > /etc/apt/sources.list.d/ros-latest.list'
 ```
 
-Obtain repository key.
+リポジトリの鍵を取得します。
 
 ```
 $ sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net --recv-key 0xB01FA116
 ```
 
-Please execute `apt-get update`.
+apt-get updateします。
 
 ```
 $ sudo apt-get update
 ```
 
-Start up ROS installation with `apt-get install`
+ROSのインストールを開始します。
 
 ```
 $ sudo apt-get install ros-indigo-ros-base -y
 ```
 
-If ROS installation is finished, check operation. Configure PATH(environment variable).
+インストールが終了したら動作確認をします。ROSのパスを設定します。
 
 ```
 $ source /opt/ros/indigo/setup.bash
 ```
 
-Boot up **roscore**. If the installation has been successful, the following log will be output.  
-You can terminate with `ctl + c`
+**roscore**を起動します。以下のようなログが出ればインストール成功です。ctl+cで
+停止です。
 
 ```
 $ roscore
@@ -1237,34 +1246,31 @@ process[rosout-1]: started with pid [6957]
 started core service [/rosout]
 ```
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
 
 <a name="complete"></a>
-## Complete!
-Congratulation! The build of system is completed!
+##Complete!
+これでシステム構築は終了です。お疲れさまでした。
 
-<a name="reference"></a>
-## Reference
+<a name="参考サイト"></a>
+##参考サイト
 
-In making this tutorial, I have used the following website as a reference.
-I greatly appreciate the websites and the creators.  
-***I translated the titles of the websites from Japanese to English.***
+このチュートリアル作成において、以下webサイト並びに作成者様には大変感謝しております。  
+ありがとうございました。
 
-- [FPGA NO HEYA](http://marsee101.blog19.fc2.com/)
-	- [Embedded Linux for ZYBO Tutorial 1 (Upgrade IP)](http://marsee101.blog19.fc2.com/blog-entry-2911.html)
-	- [How to create SD card for booting up Embedded Linux on ZYBO](http://marsee101.blog19.fc2.com/blog-entry-2929.html)
-	- [Embed root file system of ARMhf into Digilent Linux kernel for ZYBO](http://marsee101.blog19.fc2.com/blog-entry-3056.html)
-	- [Build Ubuntu Linux for ZedBoard part 8 (add swap space)](http://marsee101.blog19.fc2.com/blog-entry-2820.html)
-- [blog KEITESU : Use Ubuntu root file system on ZYBO](http://keitetsu.blogspot.jp/2015/01/zyboubuntu.html)
+- [FPGAの部屋](http://marsee101.blog19.fc2.com/)
+	- [ZYBO用のEmbedded Linux チュートリアル１（IPのアップグレード）](http://marsee101.blog19.fc2.com/blog-entry-2911.html)
+	- [ZYBO用のEmbedded Linux をブートするSDカードの作り方](http://marsee101.blog19.fc2.com/blog-entry-2929.html)
+	- [ZYBOのDigilent Linux KernelにARMhfのRoot File Systemsを入れる](http://marsee101.blog19.fc2.com/blog-entry-3056.html)
+	- [ZedBoard用のUbuntu Linuxをビルド８（swap spaceの追加）](http://marsee101.blog19.fc2.com/blog-entry-2820.html)
+- [blog 渓鉄 : ZYBOでUbuntuのルートファイルシステムを使用する](http://keitetsu.blogspot.jp/2015/01/zyboubuntu.html)
 
-
-
-<a name="various-documents"></a>
-## Various Documents
+<a name="各種ドキュメント"></a>
+##各種ドキュメント
 - [Xillybus Documentaion](http://xillybus.com/doc)
 	- [Getting started with Xillinux for Zynq-7000 EPP ](http://xillybus.com/downloads/doc/xillybus_getting_started_zynq.pdf)
 	- [Getting started with Xillybus on a Linux host](http://xillybus.com/downloads/doc/xillybus_getting_started_linux.pdf)
 	- [The guide to Xillybus Lite](http://xillybus.com/downloads/doc/xillybus_lite.pdf)
 - [ROS Wiki : Ubuntu ARM install of ROS Indigo](http://wiki.ros.org/indigo/Installation/UbuntuARM)
 
-[Return to Contents](#Contents)
+[Contentsにもどる](#Contents)
