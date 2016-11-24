@@ -1020,10 +1020,10 @@ If you need to set proxy server, please make the following settings.
 
 ```
 # cat <<EOT>> /etc/apt/apt.conf
-Acquire::ftp::proxy "ftp://proxy.servr.jp:port/";
-Acquire::http::proxy "http://proxy.servr.jp:port/";
-Acquire::https::proxy "https://proxy.servr.jp:port/";
-Acquire::socks::proxy "socks://proxy.servr.jp:port/";
+Acquire::ftp::proxy "ftp://proxy.server.jp:port/";
+Acquire::http::proxy "http://proxy.server.jp:port/";
+Acquire::https::proxy "https://proxy.server.jp:port/";
+Acquire::socks::proxy "socks://proxy.server.jp:port/";
 EOT
 ```
 
@@ -1039,7 +1039,6 @@ export FTP_PROXY=http://proxy.server.jp:port/
 export https_proxy=http://proxy.server.jp:port/
 export http_proxy=http://proxy.server.jp:port/
 export ftp_proxy=http://proxy.server.jp:port/
-
 ```
 
 <a name="installation-of-various-tools"></a>

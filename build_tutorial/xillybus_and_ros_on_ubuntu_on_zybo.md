@@ -1028,10 +1028,10 @@ Proxyの設定が必要な場合は以下の設定をしてください。
 
 ```
 # cat <<EOT>> /etc/apt/apt.conf
-Acquire::ftp::proxy "ftp://proxy.servr.jp:port/";
-Acquire::http::proxy "http://proxy.servr.jp:port/";
-Acquire::https::proxy "https://proxy.servr.jp:port/";
-Acquire::socks::proxy "socks://proxy.servr.jp:port/";
+Acquire::ftp::proxy "ftp://proxy.server.jp:port/";
+Acquire::http::proxy "http://proxy.server.jp:port/";
+Acquire::https::proxy "https://proxy.server.jp:port/";
+Acquire::socks::proxy "socks://proxy.server.jp:port/";
 EOT
 ```
 

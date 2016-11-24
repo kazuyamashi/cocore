@@ -15,7 +15,7 @@
 - Robotic system using FPGA
 - Distributed system using FPGA
 
-In COCORE, a file system is based on **Ubuntu 14.04 armhf**, and COCORE includes cReComp **Xillybus** and **ROS (Robot Operating System)**.
+In COCORE, a file system is based on **Ubuntu 14.04 armhf**, and COCORE includes **Xillybus** and **ROS (Robot Operating System)**.
 
 - [Xillybus](http://xillybus.com/)
 - [ROS](http://www.ros.org/)
