@@ -1,4 +1,5 @@
-# COCORE
+<img src="logo/cocore_logo_str.png" width="60%">
+
 **CO**mponent oriented development & **CO**operation of software application and **RE**configurable device  
 
 **Git**:         https://github.com/kazuyamashi/cocore.git  
