@@ -936,7 +936,7 @@ root@ubuntu-armhf:~# uname -r
 <a name="setting-on-zybo-zybo"></a>
 ##Setting on Zybo @Zybo
 
-Change each directory or file permissions.
+Change each directory or binary permission.
 
 ```
 # chmod 4755 /usr/bin/sudo
