@@ -32,7 +32,8 @@ In COCORE, a file system is based on **Ubuntu 14.04 armhf**, and COCORE includes
 
 # How to build this distribution for Zedboard
 
-It is preparing and it will be released soon.
+[Xillybus and ROS on Ubuntu on Zedboard : Japanese](zedboard/build_instruction/xillybus_and_ros_on_ubuntu_on_zedboard.md)  
+<!-- [Xillybus and ROS on Ubuntu on Zybo : English](zybo/build_instruction/xillybus_and_ros_on_ubuntu_on_zybo_en.md) -->
 
 # Download SD image
 

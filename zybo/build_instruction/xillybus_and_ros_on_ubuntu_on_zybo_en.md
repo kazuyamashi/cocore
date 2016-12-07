@@ -292,6 +292,16 @@ Edit contents of **zynq-zybo.dts** are as follows.
 +				operating-points = <650000 1000000>;
 				reg = <0x0>;
 		} ;
+	};
+:
+:
+:
+	ps7_axi_interconnect_0: amba@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "xlnx,ps7-axi-interconnect-1.00.a", "simple-bus";
+		ranges ;
+		/*In brackets of "ps7_axi_interconnect_0"*/
 :
 :
 :

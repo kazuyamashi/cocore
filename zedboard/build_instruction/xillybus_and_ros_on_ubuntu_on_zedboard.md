@@ -1,4 +1,4 @@
-# Xillybus and ROS on Ubuntu on Zedboaed
+# Xillybus and ROS on Ubuntu on Zedboard
 
 ###目標
 DigilentのZedboard上でUbuntu14.04 + Xillybus + ROS indigoが動作するシステムを作る
@@ -12,8 +12,8 @@ DigilentのZedboard上でUbuntu14.04 + Xillybus + ROS indigoが動作するシ�
 	- Vivado 2014.4
 - Windowsマシン：Windows10 (回路の論理合成をするため。LinuxマシンのみでもOK)
 	- Vivado 2014.4
-- Zybo
-- microSD 16GB：8GB以上推奨
+- Zedboard
+- SD card 16GB：8GB以上推奨
 
 <a name="Contents"></a>
 ###Contents
@@ -30,13 +30,13 @@ DigilentのZedboard上でUbuntu14.04 + Xillybus + ROS indigoが動作するシ�
 - [ブート用SDの作成@Ubuntu](#ブート用sdの作成ubuntu)
 - [SDカードに書き込み@Ubuntu](#sdカードに書き込みubuntu)
 - [起動テスト@Windows](#起動テストwindows)
-- [Zybo上における設定@Zybo](#zybo上における設定zybo)
+- [Zedboard上における設定@Zedboard](#zedboard上における設定zedboard)
 	- [xillybusのデバイスドライバのパーミッションの設定](#xillybusのデバイスドライバのパーミッションの設定)
 	- [Swap領域を作る](#swap領域を作る)
 	- [Proxyを設定する](#proxyを設定する)
 	- [各種ツール導入](#各種ツール導入)
-- [デモappを動かす@Zybo](#デモappを動かすzybo)
-- [ROS indigoのインストール@Zybo](#ros-indigoのインストールzybo)
+- [デモappを動かす@Zedboard](#デモappを動かすzedboard)
+- [ROS indigoのインストール@Zedboard](#ros-indigoのインストールzedboard)
 - [Complete!](#complete)
 - [参考サイト](#参考サイト)
 - [各種ドキュメント](#各種ドキュメント)
@@ -118,6 +118,7 @@ ZedboardにおいてSDカードの別パーティションからファイルシ�
 
 
 ```diff
+//287行目あたり
 	"sdboot=if mmcinfo; then " \
 			"run uenvboot; " \
 -			"echo Copying Linux from SD to RAM... && " \
@@ -281,8 +282,9 @@ BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage
 <a name="デバイスツリーファイルdtbの作成ubuntu"></a>
 ##デバイスツリーファイル(dtb)の作成@Ubuntu
 
-dtbの作成に使用するdtsファイルは`/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zed.dts`です。  
-この際、**zynq-zed.dts**では`/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-7000.dtsi`をインクルードしています。**zynq-7000.dtsi**ではZynqシリーズのチップに共通する設定が記述されています。  
+dtbの作成に使用するdtsファイルは`~/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zed.dts`です。  
+この際、**zynq-zed.dts**では`~/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-7000.dtsi`をインクルードしています。  
+**zynq-7000.dtsi**ではZynqシリーズのチップに共通する設定が記述されています。  
 今回は、**zynq-7000.dtsi**にXillybusのIPの情報を追加します。また、**zynq-zed.dts**にはブートする際の設定を記述します。
 
 ```
@@ -340,7 +342,7 @@ $ cd ~/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts
 次に**zynq-zed.dts**の編集内容です。
 
 ```diff
-
+/*31行目あたり*/
 	chosen {
 -		bootargs = "console=ttyPS0,115200 root=/dev/ram rw earlyprintk";
 +		bootargs = "console=ttyPS0,115200 root=/dev/mmcblk0p2 rw earlyprintk rootfstype=ext4 rootwait devtmpfs.mount=1";
@@ -411,7 +413,7 @@ bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys
 <a name="ブート用sdの作成ubuntu"></a>
 ##ブート用SDの作成@Ubuntu
 
-Zybo上でUbuntuを起動するために、SDカード(microSD)にパーティションを作成します。  
+Zedboard上でUbuntuを起動するために、SDカードにパーティションを作成します。  
 使用するSDカードは**8GB**以上をおすすめします。  
   
 
@@ -679,7 +681,7 @@ exec /sbin/getty -8 -a root 115200 ttyPS0
 <a name="起動テストwindows"></a>
 ##起動テスト@Windows
 
-Zyboと母艦PCをUSBケーブルで接続してください。  
+Zedboardと母艦PCをUSBケーブルで接続してください。  
 Windowsマシンにおいては、デバイスドライバがインストールされているならば、[Tera Term](https://ttssh2.osdn.jp/)などでシリアル接続が可能です。  
 
 以下はブートログです。
@@ -961,8 +963,8 @@ root@ubuntu-armhf:~# uname -r
 
 [Contentsにもどる](#Contents)
 
-<a name="zybo上における設定zybo"></a>
-##Zybo上における設定@Zybo
+<a name="zedboard上における設定zedboard"></a>
+##Zedboard上における設定@Zedboard
 
 各種パーミッションを変更します。
 
@@ -1001,7 +1003,7 @@ EOT
 <a name="swap領域を作る"></a>
 ###Swap領域を作る
 
-Zyboにおいて作業をする際にSwap領域を作成したほうが作業がスピーディーになる場合があります。
+Zedboardにおいて作業をする際にSwap領域を作成したほうが作業がスピーディーになる場合があります。
 
 `/var/cache`にSawp領域用のディレクトリを作ります。
 
@@ -1106,8 +1108,8 @@ ssh接続においてrootログインできるように設定します。
 
 [Contentsにもどる](#Contents)
 
-<a name="デモappを動かすzybo"></a>
-##デモappを動かす@Zybo
+<a name="デモappを動かすzedboard"></a>
+##デモappを動かす@Zedboard
 
 ubuntuユーザになります。
 
@@ -1196,8 +1198,8 @@ $ python read.py
 
 [Contentsにもどる](#Contents)
 
-<a name="ros-indigoのインストールzybo"></a>
-##ROS indigoのインストール@Zybo
+<a name="ros-indigoのインストールzedboard"></a>
+##ROS indigoのインストール@Zedboard
 
 ROSの導入をします。  
 
@@ -1272,16 +1274,8 @@ started core service [/rosout]
 
 <a name="参考サイト"></a>
 ##参考サイト
+- [zynq (Zed board)でubuntuを動かす on Qiita](http://qiita.com/yuichiroTCY/items/3b792feedb8f55aaef43)
 
-このチュートリアル作成において、以下webサイト並びに作成者様には大変感謝しております。  
-ありがとうございました。
-
-- [FPGAの部屋](http://marsee101.blog19.fc2.com/)
-	- [ZYBO用のEmbedded Linux チュートリアル１（IPのアップグレード）](http://marsee101.blog19.fc2.com/blog-entry-2911.html)
-	- [ZYBO用のEmbedded Linux をブートするSDカードの作り方](http://marsee101.blog19.fc2.com/blog-entry-2929.html)
-	- [ZYBOのDigilent Linux KernelにARMhfのRoot File Systemsを入れる](http://marsee101.blog19.fc2.com/blog-entry-3056.html)
-	- [ZedBoard用のUbuntu Linuxをビルド８（swap spaceの追加）](http://marsee101.blog19.fc2.com/blog-entry-2820.html)
-- [blog 渓鉄 : ZYBOでUbuntuのルートファイルシステムを使用する](http://keitetsu.blogspot.jp/2015/01/zyboubuntu.html)
 
 <a name="各種ドキュメント"></a>
 ##各種ドキュメント

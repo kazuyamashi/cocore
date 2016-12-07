@@ -298,6 +298,16 @@ BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage  zynq-zybo.dts
 +				operating-points = <650000 1000000>;
 				reg = <0x0>;
 		} ;
+	};
+:
+:
+:
+	ps7_axi_interconnect_0: amba@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "xlnx,ps7-axi-interconnect-1.00.a", "simple-bus";
+		ranges ;
+		/*"ps7_axi_interconnect_0"のブロックのなか*/
 :
 :
 :
