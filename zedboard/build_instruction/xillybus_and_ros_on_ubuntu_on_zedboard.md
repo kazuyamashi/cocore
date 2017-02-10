@@ -113,9 +113,7 @@ $ git checkout xilinx-v14.4
 
 `u-boot-xlnx/include/configs/zynq-common.h`を以下のように編集します。
 
-
 ZedboardにおいてSDカードの別パーティションからファイルシステムをマウントするために設定を変更します。  
-
 
 ```diff
 //287行目あたり
@@ -140,7 +138,7 @@ $ make zynq_zed_config
 $ make
 ```
 
-`~/u-boot-Digilent-Dev/`に**u-boot**が出来ていたら成功です。  
+`~/u-boot-xlnx/`に**u-boot**が出来ていたら成功です。  
 この**u-boot**をWindowsマシンの`C:\work_space`に**u-boot.elf**という名前でコピーします。
 
 <img src="img/carry_uboot.png" width="70%" >

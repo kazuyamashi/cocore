@@ -1,8 +1,8 @@
-# Xillybus and ROS on Ubuntu on Zybo
+# Xillybus and ROS on Ubuntu on ZedBoard
 
 ###Goal of this tutorial
 
-Bilding a system which runs Xillybus IP and ROS(Robot Operarting System) Indigo on Ubuntu14.04 on [Zybo](https://reference.digilentinc.com/reference/programmable-logic/zybo/start)
+Bilding a system which runs Xillybus IP and ROS(Robot Operarting System) Indigo on Ubuntu14.04 on Zedboard
 
 ###Environment of build
 
@@ -12,7 +12,7 @@ This tutorial uses both Windows and Linux, so please install Vivado + SDK 14.04 
 	- Vivado 2014.4
 - Windows : Windows10 (For hardware synthesis. Only Linux PC is OK)
 	- Vivado 2014.4
-- Zybo
+- Zedboard
 - microSD 16GB : 8GB or more is recommended!
 
 <a name="Contents"></a>
@@ -30,13 +30,13 @@ This tutorial uses both Windows and Linux, so please install Vivado + SDK 14.04 
 - [Setting SD for boot @Ubuntu](#setting-sd-for-boot-ubuntu)
 - [Writing data to SD @Ubuntu](#writing-data-to-sd-ubuntu)
 - [Boot test @Windows](#boot-test-windows)
-- [Setting on Zybo @Zybo](#setting-on-zybo-zybo)
+- [Setting on Zedboard @Zedboard](#setting-on-zedboard-zedboard)
 	- [Setting permissions of Xillybus device driver](#setting-permissions-of-xillybus-device-driver)
 	- [Create swap area](#create-swap-area)
 	- [Proxy setting](#proxy-setting)
 	- [Installation of various tools](#installation-of-various-tools)
-- [Run demo application @Zybo](#run-demo-application-zybo)
-- [Installation of ROS indigo @Zybo](#installation-of-ros-indigo-zybo)
+- [Run demo application @Zedboard](#run-demo-application-zedboard)
+- [Installation of ROS indigo @Zedboard](#installation-of-ros-indigo-zedboard)
 - [Complete!](#complete)
 - [Reference](#reference)
 - [Various Documents](#various-documents)
@@ -48,15 +48,15 @@ This tutorial uses both Windows and Linux, so please install Vivado + SDK 14.04 
 
 Firstly, create a work space under drive C (`C:\work_space`).
 
-Please download a base design of Xillybus for Zybo from [direct link](http://xillybus.com/downloads/xillinux-eval-zybo-1.3c.zip) and save your work space.
+Please download a base design of Xillybus for zedboard from [direct link](http://xillybus.com/downloads/xillinux-eval-zedboard-1.3c.zip) and save your work space.
 [Xillybus](http://xillybus.com/)
 
-`C:\work_space\xillinux-eval-zybo-1.3c.zip`
+`C:\work_space\xillinux-eval-zedboard-1.3c.zip`
 
 When archive file is unpacked, it will have the following directory structure.
 
 ```
-xillinux-eval-zybo-1.3c/
+xillinux-eval-zedboard-1.3c/
 |--bootfiles/
 |--cores/
 |--runonce/
@@ -66,7 +66,7 @@ xillinux-eval-zybo-1.3c/
 |--vivado-essentials/
 ```
 
-Start up Vivado 14.04. When starting Vivado, select `Tools -> Run Tcl Script` and specify `C:\work_space\xillinux-eval-zybo-1.3c\verilog\xillydemo-vivado.tcl`.
+Start up Vivado 14.04. When starting Vivado, select `Tools -> Run Tcl Script` and specify `C:\work_space\xillinux-eval-zedbaord-1.3c\verilog\xillydemo-vivado.tcl`.
 
 <img src="img/vivado_runtcl.png" height="50%">
 
@@ -99,24 +99,44 @@ $ source /opt/Xilinx/Vivado/2014.4/settings64.sh
 Get source code for u-boot from github repository.
 
 ```
-$ git clone -b master-next https://github.com/DigilentInc/u-boot-Digilent-Dev.git
-$ cd u-boot-Digilent-Dev/
+$ git clone https://github.com/Xilinx/u-boot-xlnx.git
+$ cd u-boot-xlnx/
 ```
 
-Configure for Zybo.
+Please checkout xilinx-v14.4 since the version of vivado is 2014.4.
 
 ```
-$ make CROSS_COMPILE=arm-xilinx-linux-gnueabi- zynq_zybo_config
+$ git checkout xilinx-v14.4
 ```
 
-Build.
+Please edit `u-boot-xlnx/include/configs/zynq-common.h` as shown below.
+
+Linux can mount file system from deferent SD partition with this editing.
+
+```diff
+//around line 287
+	"sdboot=if mmcinfo; then " \
+			"run uenvboot; " \
+-			"echo Copying Linux from SD to RAM... && " \
++			"echo Copying Linux from SD to RAM... RFS in ext4 && " \
+			"fatload mmc 0 ${kernel_load_address} ${kernel_image} && " \
+			"fatload mmc 0 ${devicetree_load_address} ${devicetree_image} && " \
+-			"fatload mmc 0 ${ramdisk_load_address} ${ramdisk_image} && " \
+-			"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}; " \
++			"bootm ${kernel_load_address} - ${devicetree_load_address}; " \
+		"fi\0" \
+```
+
+Please build.
 
 ```
-$ make CROSS_COMPILE=arm-xilinx-linux-gnueabi-
+$ export CROSS_COMPILE=arm-xilinx-linux-gnueabi-
+$ export ARCH=arm
+$ make zynq_zed_config
+$ make
 ```
 
-
-If **u-boot** was generated under `~/u-boot-Digilent-Dev/`, building is successful.  
+If **u-boot** was generated under `~/u-boot-xlnx/`, building is successful.  
 Copy the **u-boot** under `C:\work_space` at windows PC and named **u-boot.elf**.
 
 <img src="img/carry_uboot.png" width="70%" >
@@ -159,7 +179,7 @@ In Template, please select **Zynq FSBL** and Finish
 
 <img src="img/select_fsbl.png" height="400">
 
-The project of FSBL is generated and built automatically, **FSBL.elf** is generated under `C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\FSBL\Debug`.
+The project of FSBL is generated and built automatically, **FSBL.elf** is generated under `C:\work_space\xillinux-eval-zedboard-1.3c\verilog\vivado\xillydemo.sdk\FSBL\Debug`.
 
 <img src="img/gen_fsbl.png" width="70%">
 
@@ -178,13 +198,13 @@ The files are as follows.
 - xillydemo.bit
 - u-boot.elf
 
-If **xillydemo.bit** is not selected, specify `C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\xillydemo_hw_platform_0\xillydemo.bit` and **Add**
+If **xillydemo.bit** is not selected, specify `C:\work_space\xillinux-eval-zedboard-1.3c\verilog\vivado\xillydemo.sdk\xillydemo_hw_platform_0\xillydemo.bit` and **Add**
 
 When you could confirm the files, please **Create Image**.
 
 <img src="img/cre_bootbin.png" height="400">
 
-If **BOOT.bin** is generated under `C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\FSBL\bootimage`, building is successful.  
+If **BOOT.bin** is generated under `C:\work_space\xillinux-eval-zedboard-1.3c\verilog\vivado\xillydemo.sdk\FSBL\bootimage`, building is successful.  
 Copy BOOT.bin
 Copy BOOT.bin to `~/work_dir` on Ubuntu PC.
 
@@ -201,7 +221,7 @@ $ git clone -b master-next https://github.com/DigilentInc/Linux-Digilent-Dev.git
 $ cd Linux-Digilent-Dev/
 ```
 
-Configure for Zybo.
+Configure for Zedboard.
 
 ```
 $ make ARCH=arm CROSS_COMPILE=arm-xilinx-linux-gnueabi- xilinx_zynq_defconfig
@@ -253,56 +273,35 @@ BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage
 <a name="build-device-tree-filedtb-ubuntu"></a>
 ##Build device tree file(dtb) @Ubuntu
 
-The file which uses for make device tree file (dtb) is `/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zybo.dts`  
-Then edit **zynq-zybo.dts**.
-
-Copy **zynq-zybo.dts** to `~/work_dir`.
-
-```
-$ cd ~/work_dir
-$ cp Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zybo.dts .
-$ ls
-BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage  zynq-zybo.dts
-```
-
-Edit contents of **zynq-zybo.dts** are as follows.
+The file which uses for make device tree file (dtb) is `/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zed.dts`.  
+Then **zynq-zed.dts** includes `~/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-7000.dtsi`.  
+**zynq-7000.dtsi** is described standard configuration for Zynq series. In this tutorial, please add configuration of Xillybus IP to **zynq-7000.dtsi**, and add configuration of boot stage to **zynq-zed.dts**.
 
 ```diff
-/*Around line 41*/
-	chosen {
--		bootargs = "console=ttyPS0,115200 root=/dev/ram rw earlyprintk";
-+		bootargs = "console=ttyPS0,115200 root=/dev/mmcblk0p2 rw earlyprintk rootfstype=ext4 rootwait devtmpfs.mount=1";
-		linux,stdout-path = "/amba@0/serial@e0001000";
-	} ;
-+	xillinux {
-+		board = "zybo";
-+		audio = "ssm2603";
-+	} ;
-	cpus {
+/ {
+	compatible = "xlnx,zynq-7000";
+:
+:
+:
+	amba: amba {
+			compatible = "simple-bus";
 			#address-cells = <1>;
-			#size-cells = <0>;
-			ps7_cortexa9_0: cpu@0 {
-				bus-handle = <&ps7_axi_interconnect_0>;
-				clock-latency = <1000>;
-				clocks = <&clkc 3>;
-				compatible = "arm,cortex-a9";
-				device_type = "cpu";
-				interrupt-handle = <&ps7_scugic_0>;
--				operating-points = <666667 1000000 333334 1000000 222223 1000000>;
-+				operating-points = <650000 1000000>;
-				reg = <0x0>;
-		} ;
+			#size-cells = <1>;
+			interrupt-parent = <&intc>;
+			ranges;
+			/*In block of "amba"*/
 :
 :
 :
-/*Around line 329*/
-		ps7_xadc: ps7-xadc@f8007100 {
-			clocks = <&clkc 12>;
-			compatible = "xlnx,zynq-xadc-1.00.a";
-			interrupt-parent = <&ps7_scugic_0>;
-			interrupts = <0 7 4>;
-			reg = <0xf8007100 0x20>;
-		} ;
+/*around line 391*/
+		usb1: usb@e0003000 {
+			clocks = <&clkc 29>;
+			compatible = "xlnx,ps7-usb-1.00.a", "xlnx,zynq-usb-1.00.a";
+			status = "disabled";s
+			interrupt-parent = <&intc>;
+			interrupts = <0 44 4>;
+			reg = <0xe0003000 0x1000>;
+		};
 +		xillyvga@50001000 {
 +			compatible = "xillybus,xillyvga-1.00.a";
 +			reg = < 0x50001000 0x1000 >;
@@ -311,25 +310,38 @@ Edit contents of **zynq-zybo.dts** are as follows.
 +			compatible = "xillybus,xillybus-1.00.a";
 +			reg = < 0x50000000 0x1000 >;
 +			interrupts = < 0 59 1 >;
-+			interrupt-parent = <&ps7_scugic_0>;
++			interrupt-parent = <&intc>;
 +			dma-coherent;
 +		} ;
 +		xillybus_lite@50002000 {
 +			compatible = "xillybus,xillybus_lite_of-1.00.a";
 +			reg = < 0x50002000 0x1000 >;
 +			interrupts = < 0 58 1 >;
-+			interrupt-parent = <&ps7_scugic_0>;
++			interrupt-parent = <&intc>;
 +		} ;
 	} ;
 } ;
 ```
 
-When edit is completed, build device tree file.
+次に**zynq-zed.dts**の編集内容です。
+
+```diff
+/*araound line 31*/
+	chosen {
+-		bootargs = "console=ttyPS0,115200 root=/dev/ram rw earlyprintk";
++		bootargs = "console=ttyPS0,115200 root=/dev/mmcblk0p2 rw earlyprintk rootfstype=ext4 rootwait devtmpfs.mount=1";
+		linux,stdout-path = "/amba/serial@e0001000";
+	};
+```
+
+Build device tree file.
 
 ```
 $ cd ~/work_dir/Linux-Digilent-Dev
-$ ./scripts/dtc/dtc -I dts -O dtb -o ../devicetree.dtb ../zynq-zybo.dts
+$ ./scripts/dtc/dtc -I dts -O dtb -o ../devicetree.dtb arch/arm/boot/dts/zynq-zed.dts
 ```
+
+When edit is completed, build device tree file.
 
 If build is successful, devicetree.dtb will be generated under `~/work_dir`.
 
@@ -386,7 +398,7 @@ proc  root  run  sbin  srv  sys  tmp  usr  var
 <a name="setting-sd-for-boot-ubuntu"></a>
 ##Setting SD for boot @Ubuntu
 
-Make partitions on a SD card (microSD) for boot Ubuntu on Zybo.  
+Make partitions on a SD card (microSD) for boot Ubuntu on Zedboard.  
 The SD card which has 8GB and more is recommended.  
 
 Please confirm mount information by lsblk command after insert of SD card to Ubuntu PC.  
@@ -563,7 +575,7 @@ Configure partition name.
 **First partition**
 
 ```
-$ sudo mkfs.msdos -n ZYBO_BOOT /dev/sdc1
+$ sudo mkfs.msdos -n ZED_BOOT /dev/sdc1
 mkfs.fat 3.0.28 (2015-05-16)
 ```
 
@@ -591,7 +603,7 @@ Writing superblocks and filesystem accounting information: done
 Copy some files to SD card.  
 The files is following list.
 
-- ZYBO_ROOT
+- ZED_ROOT
 	- BOOT.bin
 	- devicetree.dtb
 	- uEnv.txt
@@ -599,15 +611,15 @@ The files is following list.
 - ROOT_FS
 	- Ubuntu root file system
 
-**ZYBO_ROOT**
+**ZED_ROOT**
 
 ```
 $ cd ~/work_dir
-$ cp BOOT.bin /media/user_name/ZYBO_BOOT/.
-$ cp devicetree.dtb /media/user_name/ZYBO_BOOT/.
-$ cp uEnv.txt /media/user_name/ZYBO_BOOT/.
-$ cp uImage /media/user_name/ZYBO_BOOT/.
-$ ls /media/user_name/ZYBO_BOOT/
+$ cp BOOT.bin /media/user_name/ZED_BOOT/.
+$ cp devicetree.dtb /media/user_name/ZED_BOOT/.
+$ cp uEnv.txt /media/user_name/ZED_BOOT/.
+$ cp uImage /media/user_name/ZED_BOOT/.
+$ ls /media/user_name/ZED_BOOT/
 BOOT.bin  devicetree.dtb  uEnv.txt  uImage
 ```
 
@@ -651,7 +663,7 @@ The SD card writing finished.
 <a name="boot-test-windows"></a>
 ##Boot test @Windows
 
-Please connect Zybo to PC with USB cable.  
+Please connect Zedboard to PC with USB cable.  
 Serial console can be used with [Tera Term](https://ttssh2.osdn.jp/), screen command, Terminal(OSX) and so on.  
 
 The following is a boot log.
@@ -933,8 +945,8 @@ root@ubuntu-armhf:~# uname -r
 
 [Return to Contents](#Contents)
 
-<a name="setting-on-zybo-zybo"></a>
-##Setting on Zybo @Zybo
+<a name="setting-on-zedboard-zedboard"></a>
+##Setting on Zedboard @Zedboard
 
 Change each directory or binary permission.
 
@@ -974,7 +986,7 @@ EOT
 ###Create swap area
 
 
-Working in Zybo may be faster if you create a Swap area.
+Working in Zedboard may be faster if you create a Swap area.
 
 Create a directory at `/var/cache` for the swap area.
 
@@ -1077,8 +1089,8 @@ Set root password.
 
 [Return to Contents](#Contents)
 
-<a name="run-demo-application-zybo"></a>
-##Run demo application @Zybo
+<a name="run-demo-application-zedboard"></a>
+##Run demo application @Zedboard
 
 Switch user to **ubuntu**.
 
@@ -1168,8 +1180,8 @@ $ python read.py
 
 [Return to Contents](#Contents)
 
-<a name="installation-of-ros-indigo-zybo"></a>
-## Installation of ROS indigo @Zybo
+<a name="installation-of-ros-indigo-zedboard"></a>
+## Installation of ROS indigo @Zedboard
 
 Install ROS indigo.  
 
@@ -1249,12 +1261,7 @@ In making this tutorial, I have used the following website as a reference.
 I greatly appreciate the websites and the creators.  
 ***I translated the titles of the websites from Japanese to English.***
 
-- [FPGA NO HEYA](http://marsee101.blog19.fc2.com/)
-	- [Embedded Linux for ZYBO Tutorial 1 (Upgrade IP)](http://marsee101.blog19.fc2.com/blog-entry-2911.html)
-	- [How to create SD card for booting up Embedded Linux on ZYBO](http://marsee101.blog19.fc2.com/blog-entry-2929.html)
-	- [Embed root file system of ARMhf into Digilent Linux kernel for ZYBO](http://marsee101.blog19.fc2.com/blog-entry-3056.html)
-	- [Build Ubuntu Linux for ZedBoard part 8 (add swap space)](http://marsee101.blog19.fc2.com/blog-entry-2820.html)
-- [blog KEITESU : Use Ubuntu root file system on ZYBO](http://keitetsu.blogspot.jp/2015/01/zyboubuntu.html)
+- [Ubuntu runs on Zedboard on Qiita](http://qiita.com/yuichiroTCY/items/3b792feedb8f55aaef43)
 
 
 
