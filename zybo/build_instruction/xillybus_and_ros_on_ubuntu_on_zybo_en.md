@@ -185,13 +185,19 @@ When you could confirm the files, please **Create Image**.
 <img src="img/cre_bootbin.png" height="400">
 
 If **BOOT.bin** is generated under `C:\work_space\xillinux-eval-zybo-1.3c\verilog\vivado\xillydemo.sdk\FSBL\bootimage`, building is successful.  
-Copy BOOT.bin
+
 Copy BOOT.bin to `~/work_dir` on Ubuntu PC.
 
 [Return to Contents](#Contents)
 
 <a name="build-linux-kernel-ubuntu"></a>
 ##Build Linux kernel @Ubuntu
+
+Before built kernel, please install some tools for this process.
+
+```
+$ sudo apt-get install u-boot-tools
+```
 
 Get source code for Linux kernel from github repository
 

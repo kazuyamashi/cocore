@@ -220,6 +220,13 @@ BOOT.binはUbuntuマシンの`~/work_dir`へコピーしておきましょう。
 <a name="linuxカーネルのビルドubuntu"></a>
 ##Linuxカーネルのビルド@Ubuntu
 
+Linuxカーネルのビルドの前に，お手持ちのコンピュータにビルドに必要なソフトウェアをインストールします．
+**下記に示したもの以外にも必要なソフトウェアはあるかもしれませんが，ビルドログを参考にご自身でインストールしていただければと思います．**
+
+```
+$ sudo apt-get install u-boot-tools
+```
+
 Linuxカーネルのソースコードを取得します。
 
 ```
@@ -237,7 +244,9 @@ $ make ARCH=arm CROSS_COMPILE=arm-xilinx-linux-gnueabi- xilinx_zynq_defconfig
 ここで、LinuxカーネルにXillybusのデバイスドライバを導入するために`~/work_dir/Linux-Digilent-Dev/.config`を編集します。
 
 ```diff
+<a name="config"></a>
 # .config
+<a name="1503行目あたり。xillyで検索してもいい。"></a>
 # 1503行目あたり。"xilly"で検索してもいい。
 - # CONFIG_XILLYBUS is not set
 + CONFIG_XILLYBUS=y
@@ -450,7 +459,6 @@ Welcome to fdisk (util-linux 2.27.1).
 Changes will remain in memory only, until you decide to write them.
 Be careful before using the write command.
 
-
 コマンド (m でヘルプ): p
 Disk /dev/sdc: 14.9 GiB, 15931539456 bytes, 31116288 sectors
 Units: sectors of 1 * 512 = 512 bytes
@@ -487,28 +495,6 @@ Disk identifier: 0xcc4a40d8
 - p：プライマリ、First sector：デフォルト、Last sector：デフォルト
 
 ```
-コマンド (m でヘルプ): n
-Partition type
-   p   primary (0 primary, 0 extended, 4 free)
-   e   extended (container for logical partitions)
-Select (default p): p
-パーティション番号 (1-4, default 1): 1
-First sector (2048-31116287, default 2048): 
-Last sector, +sectors or +size{K,M,G,T,P} (2048-31116287, default 31116287): +64M
-
-Created a new partition 1 of type 'Linux' and of size 64 MiB.
-
-コマンド (m でヘルプ): p
-Disk /dev/sdc: 14.9 GiB, 15931539456 bytes, 31116288 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disklabel type: dos
-Disk identifier: 0xcc4a40d8
-
-デバイス   起動 Start 最後から セクタ Size Id タイプ
-/dev/sdc1        2048   133119 131072  64M 83 Linux
-
 コマンド (m でヘルプ): n
 Partition type
    p   primary (1 primary, 0 extended, 3 free)
@@ -656,9 +642,13 @@ $ sudo touch ttyPS0.conf
 ファイルの中身は以下のようにしてください。
 
 ```
+<a name="ttyps0---getty"></a>
 # ttyPS0 - getty
+<a name=""></a>
 #
+<a name="this-service-maintains-a-getty-on-ttyps0-from-the-point-the-system-is"></a>
 # This service maintains a getty on ttyPS0 from the point the system is
+<a name="started-until-it-is-shut-down-again"></a>
 # started until it is shut down again.
 
 start on stopped rc RUNLEVEL=[2345] and (
@@ -704,6 +694,7 @@ reading uImage
 3464120 bytes read in 595 ms (5.6 MiB/s)
 reading devicetree.dtb
 7859 bytes read in 19 ms (403.3 KiB/s)
+<a name="booting-kernel-from-legacy-image-at-03000000-"></a>
 ## Booting kernel from Legacy Image at 03000000 ...
    Image Name:   Linux-3.18.0-xilinx-46110-gd627f
    Image Type:   ARM Linux Kernel Image (uncompressed)
@@ -711,6 +702,7 @@ reading devicetree.dtb
    Load Address: 00008000
    Entry Point:  00008000
    Verifying Checksum ... OK
+<a name="flattened-device-tree-blob-at-02a00000"></a>
 ## Flattened Device Tree blob at 02a00000
    Booting using the fdt blob at 0x2a00000
    Loading Kernel Image ... OK
@@ -967,8 +959,11 @@ root@ubuntu-armhf:~# uname -r
 各種パーミッションを変更します。
 
 ```
+<a name="chmod-4755-usrbinsudo"></a>
 # chmod 4755 /usr/bin/sudo
+<a name="chmod-777-tmp"></a>
 # chmod 777 /tmp
+<a name="chmod-orwt-tmp"></a>
 # chmod o+rwt /tmp
 ```
 
@@ -977,13 +972,16 @@ root@ubuntu-armhf:~# uname -r
 そのため、のちの作業の便宜上、ユーザ**ubuntu**をsudoのグループに追加します。
 
 ```
+<a name="gpasswd--a-ubuntu-sudo"></a>
 # gpasswd -a ubuntu sudo
 ```
 
 また、`/home/ubuntu`の所有者とグループを変更します。
 
 ```
+<a name="cd-home"></a>
 # cd /home
+<a name="chown-ubuntuubuntu-ubuntu"></a>
 # chown ubuntu:ubuntu ubuntu/
 ```
 
@@ -993,6 +991,7 @@ root@ubuntu-armhf:~# uname -r
 xillybusのデバイスドライバのパーミッションを固定するために設定ファイルを作成します。
 
 ```
+<a name="cat--etcudevrulesd10-xillybusrules"></a>
 # cat <<EOT>> /etc/udev/rules.d/10-xillybus.rules
 SUBSYSTEM=="xillybus", MODE="666", OPTIONS="last_rule"
 EOT
@@ -1006,13 +1005,16 @@ Zedboardにおいて作業をする際にSwap領域を作成したほうが作�
 `/var/cache`にSawp領域用のディレクトリを作ります。
 
 ```
+<a name="mkdir-varcacheswap"></a>
 # mkdir /var/cache/swap
 ```
 
 以下のコマンドで512MBのswapfileを生成します。
 
 ```
+<a name="dd-ifdevzero-ofvarcacheswapswapfile-bs1m-count512"></a>
 # dd if=/dev/zero of=/var/cache/swap/swapfile bs=1M count=512
+<a name="mkswap-varcacheswapswapfile"></a>
 # mkswap /var/cache/swap/swapfile
 ```
 
@@ -1020,18 +1022,21 @@ Zedboardにおいて作業をする際にSwap領域を作成したほうが作�
 ファイル内に`/var/cache/swap/swapfile none swap sw 0 0`の行を追加してください。
 
 ```
+<a name="nano-etcfstab"></a>
 # nano /etc/fstab
 ```
 
 リブートしましょう。
 
 ```
+<a name="reboot"></a>
 # reboot
 ```
 
 swaponで確認すると、先ほどの設定が確認できます。
 
 ```
+<a name="swapon--s"></a>
 # swapon -s
 Filename                                Type            Size    Used    Priority
 /var/cache/swap/swapfile                file            524284  0       -1
@@ -1045,6 +1050,7 @@ Proxyの設定が必要な場合は以下の設定をしてください。
 **apt-get**
 
 ```
+<a name="cat--etcaptaptconf"></a>
 # cat <<EOT>> /etc/apt/apt.conf
 Acquire::ftp::proxy "ftp://proxy.server.jp:port/";
 Acquire::http::proxy "http://proxy.server.jp:port/";
@@ -1056,7 +1062,9 @@ EOT
 **システムプロキシ**
 
 ```
+<a name="nano-~bashrc"></a>
 # nano ~/.bashrc
+<a name="末尾に追加"></a>
 ### 末尾に追加 ###
 export HTTPS_PROXY=http://proxy.server.jp:port/
 export HTTP_PROXY=http://proxy.server.jp:port/
@@ -1074,12 +1082,14 @@ export ftp_proxy=http://proxy.server.jp:port/
 apt-get updateしましょう。
 
 ```
+<a name="apt-get-update"></a>
 # apt-get update
 ```
 
 **ssh**
 
 ```
+<a name="apt-get-install-ssh--y"></a>
 # apt-get install ssh -y
 ```
 
@@ -1094,12 +1104,14 @@ ssh接続においてrootログインできるように設定します。
 また、rootパスワードを設定しておきましょう。
 
 ```
+<a name="passwd"></a>
 # passwd
 ```
 
 **その他**
 
 ```
+<a name="apt-get-install-gcc-g-make-git--y"></a>
 # apt-get install gcc g++ make git -y
 ```
 
@@ -1112,6 +1124,7 @@ ssh接続においてrootログインできるように設定します。
 ubuntuユーザになります。
 
 ```
+<a name="su-ubuntu"></a>
 # su ubuntu
 $ cd
 ```
@@ -1138,6 +1151,7 @@ touch read.py write.py
 **read.py**
 
 ```python
+<a name="---coding-utf-8---"></a>
 # -*- coding: utf-8 -*-
 
 import os
@@ -1159,6 +1173,7 @@ if __name__ == '__main__':
 **write.py**
 
 ```python
+<a name="---coding-utf-8----1"></a>
 # -*- coding: utf-8 -*-
 
 import os

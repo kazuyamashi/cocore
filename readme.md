@@ -3,7 +3,7 @@
 **CO**mponent oriented development & **CO**operation of software application and **RE**configurable device  
 
 **Git**:         https://github.com/kazuyamashi/cocore.git  
-**Maintainer**:  Kazushi Yamashina (Utsunomiya University)  
+**Maintainer**:  Kazushi Yamashina
 **Copyright**:   2016, Kazushi Yamashina  
 **License**:     GPL-2.0  
 **Contact**: 	 kazuyamashi_at_gmail.com  or [Twitter](https://twitter.com/KazushihsuzaK) or [Facebook](https://www.facebook.com/kazushi.yamashina?fref=nf)
@@ -60,6 +60,7 @@ COCORE supports some FPGA boards.
 
 [Xillybus and ROS on Ubuntu on Zedboard : Japanese](zedboard/build_instruction/xillybus_and_ros_on_ubuntu_on_zedboard.md)  
 [Xillybus and ROS on Ubuntu on Zedboard : English](zedboard/build_instruction/xillybus_and_ros_on_ubuntu_on_zedboard_en.md)
+
 
 # Download SD image
 

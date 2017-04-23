@@ -213,6 +213,12 @@ Copy BOOT.bin to `~/work_dir` on Ubuntu PC.
 <a name="build-linux-kernel-ubuntu"></a>
 ##Build Linux kernel @Ubuntu
 
+Before built kernel, please install some tools for this process.
+
+```
+$ sudo apt-get install u-boot-tools
+```
+
 Get source code for Linux kernel from github repository
 
 ```
