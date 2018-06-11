@@ -1,9 +1,9 @@
 # Xillybus and ROS on Ubuntu on Zybo
 
-###目標
+### 目標
 Digilentの[Zybo](https://reference.digilentinc.com/reference/programmable-logic/zybo/start)上でUbuntu14.04 + Xillybus + ROS indigoが動作するシステムを作る
 
-###使用環境
+### 使用環境
 
 本チュートリアルではLinuxマシンとWindowsマシンの両方を使用しています．  
 どちらのマシンにもVivado14.04(SDKも)をインストールしてください．
@@ -16,35 +16,38 @@ Digilentの[Zybo](https://reference.digilentinc.com/reference/programmable-logic
 - microSD 16GB：8GB以上推奨
 
 <a name="Contents"></a>
-###Contents
+### Contents
 
 <!-- MarkdownTOC autolink="true" autoanchor="true" bracket="round" depth="3" -->
 
-- [ハードウェアのビルド@Windows](#ハードウェアのビルドwindows)
-- [u-bootのビルド@Ubuntu](#u-bootのビルドubuntu)
-- [BOOT.binの生成@Windows](#bootbinの生成windows)
-- [Linuxカーネルのビルド@Ubuntu](#linuxカーネルのビルドubuntu)
-- [デバイスツリーファイル\(dtb\)の作成@Ubuntu](#デバイスツリーファイルdtbの作成ubuntu)
-- [uEnv.txt作成@Ubuntu](#uenvtxt作成ubuntu)
-- [Ubuntuのファイルシステムの取得@Ubuntu](#ubuntuのファイルシステムの取得ubuntu)
-- [ブート用SDの作成@Ubuntu](#ブート用sdの作成ubuntu)
-- [SDカードに書き込み@Ubuntu](#sdカードに書き込みubuntu)
-- [起動テスト@Windows](#起動テストwindows)
-- [Zybo上における設定@Zybo](#zybo上における設定zybo)
-	- [xillybusのデバイスドライバのパーミッションの設定](#xillybusのデバイスドライバのパーミッションの設定)
-	- [Swap領域を作る](#swap領域を作る)
-	- [Proxyを設定する](#proxyを設定する)
-	- [各種ツール導入](#各種ツール導入)
-- [デモappを動かす@Zybo](#デモappを動かすzybo)
-- [ROS indigoのインストール@Zybo](#ros-indigoのインストールzybo)
-- [Complete!](#complete)
-- [参考サイト](#参考サイト)
-- [各種ドキュメント](#各種ドキュメント)
+- [Xillybus and ROS on Ubuntu on Zybo](#xillybus-and-ros-on-ubuntu-on-zybo)
+		- [目標](#)
+		- [使用環境](#)
+		- [Contents](#contents)
+	- [ハードウェアのビルド@Windows](#windows)
+	- [u-bootのビルド@Ubuntu](#u-bootubuntu)
+	- [BOOT.binの生成@Windows](#bootbinwindows)
+	- [デバイスツリーファイル(dtb)の作成@Ubuntu](#dtbubuntu)
+	- [uEnv.txt作成@Ubuntu](#uenvtxtubuntu)
+	- [Ubuntuのファイルシステムの取得@Ubuntu](#ubuntuubuntu)
+	- [ブート用SDの作成@Ubuntu](#sdubuntu)
+	- [SDカードに書き込み@Ubuntu](#sdubuntu)
+	- [起動テスト@Windows](#windows)
+	- [Zybo上における設定@Zybo](#zybozybo)
+		- [xillybusのデバイスドライバのパーミッションの設定](#xillybus)
+		- [Swap領域を作る](#swap)
+		- [Proxyを設定する](#proxy)
+		- [各種ツール導入](#)
+	- [デモappを動かす@Zybo](#appzybo)
+	- [ROS indigoのインストール@Zybo](#ros-indigozybo)
+	- [Complete!](#complete)
+	- [参考サイト](#)
+	- [各種ドキュメント](#)
 
 <!-- /MarkdownTOC -->
 
 <a name="ハードウェアのビルドwindows"></a>
-##ハードウェアのビルド@Windows
+## ハードウェアのビルド@Windows
 
 Windowsマシン上において、最初にCドライブ直下にワークスペース`C:\work_space`を作ります．  
 以下、Windowsマシンにおける作業はこのワークスペースにおいて行います．  
@@ -83,7 +86,7 @@ XillybusのVivadoプロジェクトが起動します．
 [Contentsにもどる](#Contents)
 
 <a name="u-bootのビルドubuntu"></a>
-##u-bootのビルド@Ubuntu
+## u-bootのビルド@Ubuntu
 Ubuntuマシン上において、最初にワークスペースを作ります．  
 以下、Ubuntuマシンにおける作業はこのワークスペースにおいて行います．  
 
@@ -126,7 +129,7 @@ $ make CROSS_COMPILE=arm-xilinx-linux-gnueabi-
 
 
 <a name="bootbinの生成windows"></a>
-##BOOT.binの生成@Windows
+## BOOT.binの生成@Windows
 
 先ほどビルドしたVivado上のハードウェアをエクスポートします．  
 `File->Export->Export Hardware`を選択してください．
@@ -139,7 +142,7 @@ $ make CROSS_COMPILE=arm-xilinx-linux-gnueabi-
 
 SDKを起動します．`File->Launch SDK`を選択してください．
 
-<img src="img/launch_sdk.png" width="60%"">
+<img src="img/launch_sdk.png" width="60%">
 
 以下のダイアログが出ます．OKしてください．
 
@@ -264,7 +267,7 @@ BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage
 [Contentsにもどる](#Contents)
 
 <a name="デバイスツリーファイルdtbの作成ubuntu"></a>
-##デバイスツリーファイル(dtb)の作成@Ubuntu
+## デバイスツリーファイル(dtb)の作成@Ubuntu
 
 dtbの作成に使用するdtsファイルは`/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zybo.dts`です．  
 この際、**zynq-zybo.dts**を編集します．
@@ -359,7 +362,7 @@ $ ./scripts/dtc/dtc -I dts -O dtb -o ../devicetree.dtb ../zynq-zybo.dts
 [Contentsにもどる](#Contents)
 
 <a name="uenvtxt作成ubuntu"></a>
-##uEnv.txt作成@Ubuntu
+## uEnv.txt作成@Ubuntu
 
 uEnv.txtを作成します．
 
@@ -373,7 +376,7 @@ EOT
 [Contentsにもどる](#Contents)
 
 <a name="ubuntuのファイルシステムの取得ubuntu"></a>
-##Ubuntuのファイルシステムの取得@Ubuntu
+## Ubuntuのファイルシステムの取得@Ubuntu
 
 以下URLからUbuntu14.04 armhfのルートファイルシステムをダウンロードできます．  
 なお、今回はwgetで取得しますのでwebサイトにおけるダウンロードはいりません．  
@@ -408,7 +411,7 @@ bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys
 [Contentsにもどる](#Contents)
 
 <a name="ブート用sdの作成ubuntu"></a>
-##ブート用SDの作成@Ubuntu
+## ブート用SDの作成@Ubuntu
 
 Zybo上でUbuntuを起動するために、SDカード(microSD)にパーティションを作成します．  
 使用するSDカードは**8GB**以上をおすすめします．  
@@ -591,7 +594,7 @@ Writing superblocks and filesystem accounting information: done
 [Contentsにもどる](#Contents)
 
 <a name="sdカードに書き込みubuntu"></a>
-##SDカードに書き込み@Ubuntu
+## SDカードに書き込み@Ubuntu
 
 SDカードにシステムに必要なファイルをコピーします．  
 コピーするファイルは以下のものです．（SDカードをマウントしてください．）
@@ -654,7 +657,7 @@ exec /sbin/getty -8 -a root 115200 ttyPS0
 [Contentsにもどる](#Contents)
 
 <a name="起動テストwindows"></a>
-##起動テスト@Windows
+## 起動テスト@Windows
 
 Zyboと母艦PCをUSBケーブルで接続してください．  
 Windowsマシンにおいては、デバイスドライバがインストールされているならば、[Tera Term](https://ttssh2.osdn.jp/)などでシリアル接続が可能です．  
@@ -939,7 +942,7 @@ root@ubuntu-armhf:~# uname -r
 [Contentsにもどる](#Contents)
 
 <a name="zybo上における設定zybo"></a>
-##Zybo上における設定@Zybo
+## Zybo上における設定@Zybo
 
 各種パーミッションを変更します．
 
@@ -965,7 +968,7 @@ root@ubuntu-armhf:~# uname -r
 ```
 
 <a name="xillybusのデバイスドライバのパーミッションの設定"></a>
-###xillybusのデバイスドライバのパーミッションの設定
+### xillybusのデバイスドライバのパーミッションの設定
 
 xillybusのデバイスドライバのパーミッションを固定するために設定ファイルを作成します．
 
@@ -976,7 +979,7 @@ EOT
 ```
 
 <a name="swap領域を作る"></a>
-###Swap領域を作る
+### Swap領域を作る
 
 Zyboにおいて作業をする際にSwap領域を作成したほうが作業がスピーディーになる場合があります．
 
@@ -1015,7 +1018,7 @@ Filename                                Type            Size    Used    Priority
 ```
 
 <a name="proxyを設定する"></a>
-###Proxyを設定する
+### Proxyを設定する
 
 Proxyの設定が必要な場合は以下の設定をしてください．
 
@@ -1046,7 +1049,7 @@ export ftp_proxy=http://proxy.server.jp:port/
 ```
 
 <a name="各種ツール導入"></a>
-###各種ツール導入
+### 各種ツール導入
 
 apt-get updateしましょう．
 
@@ -1084,7 +1087,7 @@ ssh接続においてrootログインできるように設定します．
 [Contentsにもどる](#Contents)
 
 <a name="デモappを動かすzybo"></a>
-##デモappを動かす@Zybo
+## デモappを動かす@Zybo
 
 ubuntuユーザになります．
 
@@ -1104,7 +1107,7 @@ XillybusではプロセッシングシステムとFPGA間においてデータ�
 また、read用、write用のそれぞれのデバイスファイルがあり、データを読み書きするとFPGAの回路上のFIFOがデータをバッファしてくれます．
 ここではPythonでread用とwrite用のそれぞれのプログラムを作成・実行します．
 
-touchコマンドでread.py、write.pyを作成します．
+touchコマンドで`read.py`、`write.py`を作成します．
 
 ```
 touch read.py write.py
@@ -1174,7 +1177,7 @@ $ python read.py
 [Contentsにもどる](#Contents)
 
 <a name="ros-indigoのインストールzybo"></a>
-##ROS indigoのインストール@Zybo
+## ROS indigoのインストール@Zybo
 
 ROSの導入をします．  
 
@@ -1244,11 +1247,11 @@ started core service [/rosout]
 [Contentsにもどる](#Contents)
 
 <a name="complete"></a>
-##Complete!
+## Complete!
 これでシステム構築は終了です．お疲れさまでした．
 
 <a name="参考サイト"></a>
-##参考サイト
+## 参考サイト
 
 このチュートリアル作成において、以下webサイト並びに作成者様には大変感謝しております．  
 ありがとうございました．
@@ -1261,7 +1264,7 @@ started core service [/rosout]
 - [blog 渓鉄 : ZYBOでUbuntuのルートファイルシステムを使用する](http://keitetsu.blogspot.jp/2015/01/zyboubuntu.html)
 
 <a name="各種ドキュメント"></a>
-##各種ドキュメント
+## 各種ドキュメント
 - [Xillybus Documentaion](http://xillybus.com/doc)
 	- [Getting started with Xillinux for Zynq-7000 EPP ](http://xillybus.com/downloads/doc/xillybus_getting_started_zynq.pdf)
 	- [Getting started with Xillybus on a Linux host](http://xillybus.com/downloads/doc/xillybus_getting_started_linux.pdf)

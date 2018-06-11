@@ -1,10 +1,10 @@
 # Xillybus and ROS on Ubuntu on Zybo
 
-###Goal of this tutorial
+### Goal of this tutorial
 
 Bilding a system which runs Xillybus IP and ROS(Robot Operarting System) Indigo on Ubuntu14.04 on [Zybo](https://reference.digilentinc.com/reference/programmable-logic/zybo/start)
 
-###Environment of build
+### Environment of build
 
 This tutorial uses both Windows and Linux, so please install Vivado + SDK 14.04 later each machine.
 
@@ -16,35 +16,39 @@ This tutorial uses both Windows and Linux, so please install Vivado + SDK 14.04 
 - microSD 16GB : 8GB or more is recommended!
 
 <a name="Contents"></a>
-###Contents
+### Contents
 
 <!-- MarkdownTOC autolink="true" autoanchor="true" bracket="round" depth="3" -->
 
-- [Build hardware @Windows](#build-hardware-windows)
-- [Build u-boot @Ubuntu](#build-u-boot-ubuntu)
-- [Generation of BOOT.bin @Windows](#generation-of-bootbin-windows)
-- [Build Linux kernel @Ubuntu](#build-linux-kernel-ubuntu)
-- [Build device tree file\(dtb\) @Ubuntu](#build-device-tree-filedtb-ubuntu)
-- [Description of uEnv.txt @Ubuntu](#description-of-uenvtxt-ubuntu)
-- [Get Ubuntu root file system @Ubuntu](#get-ubuntu-root-file-system-ubuntu)
-- [Setting SD for boot @Ubuntu](#setting-sd-for-boot-ubuntu)
-- [Writing data to SD @Ubuntu](#writing-data-to-sd-ubuntu)
-- [Boot test @Windows](#boot-test-windows)
-- [Setting on Zybo @Zybo](#setting-on-zybo-zybo)
-	- [Setting permissions of Xillybus device driver](#setting-permissions-of-xillybus-device-driver)
-	- [Create swap area](#create-swap-area)
-	- [Proxy setting](#proxy-setting)
-	- [Installation of various tools](#installation-of-various-tools)
-- [Run demo application @Zybo](#run-demo-application-zybo)
-- [Installation of ROS indigo @Zybo](#installation-of-ros-indigo-zybo)
-- [Complete!](#complete)
-- [Reference](#reference)
-- [Various Documents](#various-documents)
+- [Xillybus and ROS on Ubuntu on Zybo](#xillybus-and-ros-on-ubuntu-on-zybo)
+		- [Goal of this tutorial](#goal-of-this-tutorial)
+		- [Environment of build](#environment-of-build)
+		- [Contents](#contents)
+	- [Build hardware @Windows](#build-hardware-windows)
+	- [Build u-boot @Ubuntu](#build-u-boot-ubuntu)
+	- [Generation of BOOT.bin @Windows](#generation-of-bootbin-windows)
+	- [Build Linux kernel @Ubuntu](#build-linux-kernel-ubuntu)
+	- [Build device tree file(dtb) @Ubuntu](#build-device-tree-filedtb-ubuntu)
+	- [Description of uEnv.txt @Ubuntu](#description-of-uenvtxt-ubuntu)
+	- [Get Ubuntu root file system @Ubuntu](#get-ubuntu-root-file-system-ubuntu)
+	- [Setting SD for boot @Ubuntu](#setting-sd-for-boot-ubuntu)
+	- [Writing data to SD @Ubuntu](#writing-data-to-sd-ubuntu)
+	- [Boot test @Windows](#boot-test-windows)
+	- [Setting on Zybo @Zybo](#setting-on-zybo-zybo)
+		- [Setting permissions of Xillybus device driver](#setting-permissions-of-xillybus-device-driver)
+		- [Create swap area](#create-swap-area)
+		- [Proxy setting](#proxy-setting)
+		- [Installation of various tools](#installation-of-various-tools)
+	- [Run demo application @Zybo](#run-demo-application-zybo)
+	- [Installation of ROS indigo @Zybo](#installation-of-ros-indigo-zybo)
+	- [Complete!](#complete)
+	- [Reference](#reference)
+	- [Various Documents](#various-documents)
 
 <!-- /MarkdownTOC -->
 
 <a name="build-hardware-windows"></a>
-##Build hardware @Windows
+## Build hardware @Windows
 
 Firstly, create a work space under drive C (`C:\work_space`).
 
@@ -81,7 +85,7 @@ When **Generate Bitstream** completed, following dialog will open. Then select C
 [Return Contents](#Contents)
 
 <a name="build-u-boot-ubuntu"></a>
-##Build u-boot @Ubuntu
+## Build u-boot @Ubuntu
 
 On ubuntu, create a work directory `~/work_dir`
 
@@ -125,7 +129,7 @@ Copy the **u-boot** under `C:\work_space` at windows PC and named **u-boot.elf**
 
 
 <a name="generation-of-bootbin-windows"></a>
-##Generation of BOOT.bin @Windows
+## Generation of BOOT.bin @Windows
 
 Export hardware of the built project on Vivado, so select `File->Export->Export Hardware`.
 
@@ -137,7 +141,7 @@ Following dialog will open, check **Include bitstream** and OK.
 
 Boot SDK and Select `File->Launch SDK`.
 
-<img src="img/launch_sdk.png" width="60%"">
+<img src="img/launch_sdk.png" width="60%">
 
 Following dialog will open and select OK.
 
@@ -169,8 +173,8 @@ In SDK, right-click on folder named FSBL, select **Create Boot Image** from the 
 
 Select **Add** and specify `C:\work_space\u-boot.elf`, and please OK on following dialog.
 
-<img src="img/add_browse.png" width="50%"">
-<img src="img/select_bootelf.png" width="50%"">
+<img src="img/add_browse.png" width="50%">
+<img src="img/select_bootelf.png" width="50%">
 
 The files are as follows.
 
@@ -191,7 +195,7 @@ Copy BOOT.bin to `~/work_dir` on Ubuntu PC.
 [Return to Contents](#Contents)
 
 <a name="build-linux-kernel-ubuntu"></a>
-##Build Linux kernel @Ubuntu
+## Build Linux kernel @Ubuntu
 
 Before built kernel, please install some tools for this process.
 
@@ -257,7 +261,7 @@ BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage
 [Return to Contents](#Contents)
 
 <a name="build-device-tree-filedtb-ubuntu"></a>
-##Build device tree file(dtb) @Ubuntu
+## Build device tree file(dtb) @Ubuntu
 
 The file which uses for make device tree file (dtb) is `/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zybo.dts`  
 Then edit **zynq-zybo.dts**.
@@ -352,7 +356,7 @@ If build is successful, devicetree.dtb will be generated under `~/work_dir`.
 [Return to Contents](#Contents)
 
 <a name="description-of-uenvtxt-ubuntu"></a>
-##Description of uEnv.txt @Ubuntu
+## Description of uEnv.txt @Ubuntu
 
 Describe uEnv.txt.
 
@@ -366,7 +370,7 @@ EOT
 [Return to Contents](#Contents)
 
 <a name="get-ubuntu-root-file-system-ubuntu"></a>
-##Get Ubuntu root file system @Ubuntu
+## Get Ubuntu root file system @Ubuntu
 
 You can download root file system of Ubuntu14.04 from following URL.  
 In this tutorial, the file system is obtained by wget command, so download is not required on web site.
@@ -400,7 +404,7 @@ proc  root  run  sbin  srv  sys  tmp  usr  var
 [Return to Contents](#Contents)
 
 <a name="setting-sd-for-boot-ubuntu"></a>
-##Setting SD for boot @Ubuntu
+## Setting SD for boot @Ubuntu
 
 Make partitions on a SD card (microSD) for boot Ubuntu on Zybo.  
 The SD card which has 8GB and more is recommended.  
@@ -602,7 +606,7 @@ Writing superblocks and filesystem accounting information: done
 [Return to Contents](#Contents)
 
 <a name="writing-data-to-sd-ubuntu"></a>
-##Writing data to SD @Ubuntu
+## Writing data to SD @Ubuntu
 
 Copy some files to SD card.  
 The files is following list.
@@ -665,7 +669,7 @@ The SD card writing finished.
 [Return to Contents](#Contents)
 
 <a name="boot-test-windows"></a>
-##Boot test @Windows
+## Boot test @Windows
 
 Please connect Zybo to PC with USB cable.  
 Serial console can be used with [Tera Term](https://ttssh2.osdn.jp/), screen command, Terminal(OSX) and so on.  
@@ -950,7 +954,7 @@ root@ubuntu-armhf:~# uname -r
 [Return to Contents](#Contents)
 
 <a name="setting-on-zybo-zybo"></a>
-##Setting on Zybo @Zybo
+## Setting on Zybo @Zybo
 
 Change each directory or binary permission.
 
@@ -976,7 +980,7 @@ In addition, fix owner and group of `/home/ubuntu`.
 ```
 
 <a name="setting-permissions-of-xillybus-device-driver"></a>
-###Setting permissions of Xillybus device driver
+### Setting permissions of Xillybus device driver
 
 Create a configuration file to fix permissions of the Xillybus device driver.
 
@@ -987,7 +991,7 @@ EOT
 ```
 
 <a name="create-swap-area"></a>
-###Create swap area
+### Create swap area
 
 
 Working in Zybo may be faster if you create a Swap area.
@@ -1028,7 +1032,7 @@ Filename                                Type            Size    Used    Priority
 ```
 
 <a name="proxy-setting"></a>
-###Proxy setting
+### Proxy setting
 
 If you need to set proxy server, please make the following settings.
 
@@ -1058,7 +1062,7 @@ export ftp_proxy=http://proxy.server.jp:port/
 ```
 
 <a name="installation-of-various-tools"></a>
-###Installation of various tools
+### Installation of various tools
 
 Please execute `apt-get update`.
 
@@ -1094,7 +1098,7 @@ Set root password.
 [Return to Contents](#Contents)
 
 <a name="run-demo-application-zybo"></a>
-##Run demo application @Zybo
+## Run demo application @Zybo
 
 Switch user to **ubuntu**.
 

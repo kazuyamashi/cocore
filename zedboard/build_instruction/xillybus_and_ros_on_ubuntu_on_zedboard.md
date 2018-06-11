@@ -1,9 +1,9 @@
 # Xillybus and ROS on Ubuntu on Zedboard
 
-###目標
+### 目標
 DigilentのZedboard上でUbuntu14.04 + Xillybus + ROS indigoが動作するシステムを作る
 
-###使用環境
+### 使用環境
 
 本チュートリアルではLinuxマシンとWindowsマシンの両方を使用しています。  
 どちらのマシンにもVivado14.04(SDKも)をインストールしてください。
@@ -16,35 +16,39 @@ DigilentのZedboard上でUbuntu14.04 + Xillybus + ROS indigoが動作するシ�
 - SD card 16GB：8GB以上推奨
 
 <a name="Contents"></a>
-###Contents
+### Contents
 
 <!-- MarkdownTOC autolink="true" autoanchor="true" bracket="round" depth="3" -->
 
-- [ハードウェアのビルド@Windows](#ハードウェアのビルドwindows)
-- [u-bootのビルド@Ubuntu](#u-bootのビルドubuntu)
-- [BOOT.binの生成@Windows](#bootbinの生成windows)
-- [Linuxカーネルのビルド@Ubuntu](#linuxカーネルのビルドubuntu)
-- [デバイスツリーファイル\(dtb\)の作成@Ubuntu](#デバイスツリーファイルdtbの作成ubuntu)
-- [uEnv.txt作成@Ubuntu](#uenvtxt作成ubuntu)
-- [Ubuntuのファイルシステムの取得@Ubuntu](#ubuntuのファイルシステムの取得ubuntu)
-- [ブート用SDの作成@Ubuntu](#ブート用sdの作成ubuntu)
-- [SDカードに書き込み@Ubuntu](#sdカードに書き込みubuntu)
-- [起動テスト@Windows](#起動テストwindows)
-- [Zedboard上における設定@Zedboard](#zedboard上における設定zedboard)
-	- [xillybusのデバイスドライバのパーミッションの設定](#xillybusのデバイスドライバのパーミッションの設定)
-	- [Swap領域を作る](#swap領域を作る)
-	- [Proxyを設定する](#proxyを設定する)
-	- [各種ツール導入](#各種ツール導入)
-- [デモappを動かす@Zedboard](#デモappを動かすzedboard)
-- [ROS indigoのインストール@Zedboard](#ros-indigoのインストールzedboard)
-- [Complete!](#complete)
-- [参考サイト](#参考サイト)
-- [各種ドキュメント](#各種ドキュメント)
+- [Xillybus and ROS on Ubuntu on Zedboard](#xillybus-and-ros-on-ubuntu-on-zedboard)
+		- [目標](#)
+		- [使用環境](#)
+		- [Contents](#contents)
+	- [ハードウェアのビルド@Windows](#windows)
+	- [u-bootのビルド@Ubuntu](#u-bootubuntu)
+	- [BOOT.binの生成@Windows](#bootbinwindows)
+	- [Linuxカーネルのビルド@Ubuntu](#linuxubuntu)
+	- [デバイスツリーファイル(dtb)の作成@Ubuntu](#dtbubuntu)
+	- [uEnv.txt作成@Ubuntu](#uenvtxtubuntu)
+	- [Ubuntuのファイルシステムの取得@Ubuntu](#ubuntuubuntu)
+	- [ブート用SDの作成@Ubuntu](#sdubuntu)
+	- [SDカードに書き込み@Ubuntu](#sdubuntu)
+	- [起動テスト@Windows](#windows)
+	- [Zedboard上における設定@Zedboard](#zedboardzedboard)
+		- [xillybusのデバイスドライバのパーミッションの設定](#xillybus)
+		- [Swap領域を作る](#swap)
+		- [Proxyを設定する](#proxy)
+		- [各種ツール導入](#)
+	- [デモappを動かす@Zedboard](#appzedboard)
+	- [ROS indigoのインストール@Zedboard](#ros-indigozedboard)
+	- [Complete!](#complete)
+	- [参考サイト](#)
+	- [各種ドキュメント](#)
 
 <!-- /MarkdownTOC -->
 
 <a name="ハードウェアのビルドwindows"></a>
-##ハードウェアのビルド@Windows
+## ハードウェアのビルド@Windows
 
 Windowsマシン上において、最初にCドライブ直下にワークスペース`C:\work_space`を作ります。  
 以下、Windowsマシンにおける作業はこのワークスペースにおいて行います。  
@@ -83,7 +87,7 @@ XillybusのVivadoプロジェクトが起動します。
 [Contentsにもどる](#Contents)
 
 <a name="u-bootのビルドubuntu"></a>
-##u-bootのビルド@Ubuntu
+## u-bootのビルド@Ubuntu
 Ubuntuマシン上において、最初にワークスペースを作ります。  
 以下、Ubuntuマシンにおける作業はこのワークスペースにおいて行います。  
 
@@ -147,7 +151,7 @@ $ make
 
 
 <a name="bootbinの生成windows"></a>
-##BOOT.binの生成@Windows
+## BOOT.binの生成@Windows
 
 先ほどビルドしたVivado上のハードウェアをエクスポートします。  
 `File->Export->Export Hardware`を選択してください。
@@ -160,7 +164,7 @@ $ make
 
 SDKを起動します。`File->Launch SDK`を選択してください。
 
-<img src="img/launch_sdk.png" width="60%"">
+<img src="img/launch_sdk.png" width="60%">
 
 以下のダイアログが出ます。OKしてください。
 
@@ -194,8 +198,8 @@ SDK上においてFSBLフォルダで右クリックし、メニューから**Cr
 
 ダイアログにおいて**Add**し`C:\work_space\u-boot.elf`を選択し、OKします。
 
-<img src="img/add_browse.png" width="50%"">
-<img src="img/select_bootelf.png" width="50%"">
+<img src="img/add_browse.png" width="50%">
+<img src="img/select_bootelf.png" width="50%">
 
 最終的なファイルは以下の3つです。
 
@@ -218,7 +222,7 @@ BOOT.binはUbuntuマシンの`~/work_dir`へコピーしておきましょう。
 [Contentsにもどる](#Contents)
 
 <a name="linuxカーネルのビルドubuntu"></a>
-##Linuxカーネルのビルド@Ubuntu
+## Linuxカーネルのビルド@Ubuntu
 
 Linuxカーネルのビルドの前に，お手持ちのコンピュータにビルドに必要なソフトウェアをインストールします．
 **下記に示したもの以外にも必要なソフトウェアはあるかもしれませんが，ビルドログを参考にご自身でインストールしていただければと思います．**
@@ -287,7 +291,7 @@ BOOT.bin  Linux-Digilent-Dev  u-boot-Digilent-Dev  uImage
 [Contentsにもどる](#Contents)
 
 <a name="デバイスツリーファイルdtbの作成ubuntu"></a>
-##デバイスツリーファイル(dtb)の作成@Ubuntu
+## デバイスツリーファイル(dtb)の作成@Ubuntu
 
 dtbの作成に使用するdtsファイルは`~/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-zed.dts`です。  
 この際、**zynq-zed.dts**では`~/work_dir/Linux-Digilent-Dev/arch/arm/boot/dts/zynq-7000.dtsi`をインクルードしています。  
@@ -369,7 +373,7 @@ $ ./scripts/dtc/dtc -I dts -O dtb -o ../devicetree.dtb arch/arm/boot/dts/zynq-ze
 [Contentsにもどる](#Contents)
 
 <a name="uenvtxt作成ubuntu"></a>
-##uEnv.txt作成@Ubuntu
+## uEnv.txt作成@Ubuntu
 
 uEnv.txtを作成します。
 
@@ -383,7 +387,7 @@ EOT
 [Contentsにもどる](#Contents)
 
 <a name="ubuntuのファイルシステムの取得ubuntu"></a>
-##Ubuntuのファイルシステムの取得@Ubuntu
+## Ubuntuのファイルシステムの取得@Ubuntu
 
 以下URLからUbuntu14.04 armhfのルートファイルシステムをダウンロードできます。  
 なお、今回はwgetで取得しますのでwebサイトにおけるダウンロードはいりません。  
@@ -418,7 +422,7 @@ bin  boot  dev  etc  home  lib  media  mnt  opt  proc  root  run  sbin  srv  sys
 [Contentsにもどる](#Contents)
 
 <a name="ブート用sdの作成ubuntu"></a>
-##ブート用SDの作成@Ubuntu
+## ブート用SDの作成@Ubuntu
 
 Zedboard上でUbuntuを起動するために、SDカードにパーティションを作成します。  
 使用するSDカードは**8GB**以上をおすすめします。  
@@ -600,7 +604,7 @@ Writing superblocks and filesystem accounting information: done
 [Contentsにもどる](#Contents)
 
 <a name="sdカードに書き込みubuntu"></a>
-##SDカードに書き込み@Ubuntu
+## SDカードに書き込み@Ubuntu
 
 SDカードにシステムに必要なファイルをコピーします。  
 コピーするファイルは以下のものです。（SDカードをマウントしてください。）
@@ -667,7 +671,7 @@ exec /sbin/getty -8 -a root 115200 ttyPS0
 [Contentsにもどる](#Contents)
 
 <a name="起動テストwindows"></a>
-##起動テスト@Windows
+## 起動テスト@Windows
 
 Zedboardと母艦PCをUSBケーブルで接続してください。  
 Windowsマシンにおいては、デバイスドライバがインストールされているならば、[Tera Term](https://ttssh2.osdn.jp/)などでシリアル接続が可能です。  
@@ -954,7 +958,7 @@ root@ubuntu-armhf:~# uname -r
 [Contentsにもどる](#Contents)
 
 <a name="zedboard上における設定zedboard"></a>
-##Zedboard上における設定@Zedboard
+## Zedboard上における設定@Zedboard
 
 各種パーミッションを変更します。
 
@@ -986,7 +990,7 @@ root@ubuntu-armhf:~# uname -r
 ```
 
 <a name="xillybusのデバイスドライバのパーミッションの設定"></a>
-###xillybusのデバイスドライバのパーミッションの設定
+### xillybusのデバイスドライバのパーミッションの設定
 
 xillybusのデバイスドライバのパーミッションを固定するために設定ファイルを作成します。
 
@@ -998,7 +1002,7 @@ EOT
 ```
 
 <a name="swap領域を作る"></a>
-###Swap領域を作る
+### Swap領域を作る
 
 Zedboardにおいて作業をする際にSwap領域を作成したほうが作業がスピーディーになる場合があります。
 
@@ -1043,7 +1047,7 @@ Filename                                Type            Size    Used    Priority
 ```
 
 <a name="proxyを設定する"></a>
-###Proxyを設定する
+### Proxyを設定する
 
 Proxyの設定が必要な場合は以下の設定をしてください。
 
@@ -1065,7 +1069,7 @@ EOT
 <a name="nano-~bashrc"></a>
 # nano ~/.bashrc
 <a name="末尾に追加"></a>
-### 末尾に追加 ###
+###  末尾に追加 ###
 export HTTPS_PROXY=http://proxy.server.jp:port/
 export HTTP_PROXY=http://proxy.server.jp:port/
 export FTP_PROXY=http://proxy.server.jp:port/
@@ -1077,7 +1081,7 @@ export ftp_proxy=http://proxy.server.jp:port/
 ```
 
 <a name="各種ツール導入"></a>
-###各種ツール導入
+### 各種ツール導入
 
 apt-get updateしましょう。
 
@@ -1119,7 +1123,7 @@ ssh接続においてrootログインできるように設定します。
 [Contentsにもどる](#Contents)
 
 <a name="デモappを動かすzedboard"></a>
-##デモappを動かす@Zedboard
+## デモappを動かす@Zedboard
 
 ubuntuユーザになります。
 
@@ -1140,7 +1144,7 @@ XillybusではプロセッシングシステムとFPGA間においてデータ�
 また、read用、write用のそれぞれのデバイスファイルがあり、データを読み書きするとFPGAの回路上のFIFOがデータをバッファしてくれます。
 ここではPythonでread用とwrite用のそれぞれのプログラムを作成・実行します。
 
-touchコマンドでread.py、write.pyを作成します。
+touchコマンドで`read.py`，`write.py`を作成します。
 
 ```
 touch read.py write.py
@@ -1212,7 +1216,7 @@ $ python read.py
 [Contentsにもどる](#Contents)
 
 <a name="ros-indigoのインストールzedboard"></a>
-##ROS indigoのインストール@Zedboard
+## ROS indigoのインストール@Zedboard
 
 ROSの導入をします。  
 
@@ -1282,16 +1286,16 @@ started core service [/rosout]
 [Contentsにもどる](#Contents)
 
 <a name="complete"></a>
-##Complete!
+## Complete!
 これでシステム構築は終了です。お疲れさまでした。
 
 <a name="参考サイト"></a>
-##参考サイト
+## 参考サイト
 - [zynq (Zed board)でubuntuを動かす on Qiita](http://qiita.com/yuichiroTCY/items/3b792feedb8f55aaef43)
 
 
 <a name="各種ドキュメント"></a>
-##各種ドキュメント
+## 各種ドキュメント
 - [Xillybus Documentaion](http://xillybus.com/doc)
 	- [Getting started with Xillinux for Zynq-7000 EPP ](http://xillybus.com/downloads/doc/xillybus_getting_started_zynq.pdf)
 	- [Getting started with Xillybus on a Linux host](http://xillybus.com/downloads/doc/xillybus_getting_started_linux.pdf)
